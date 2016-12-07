@@ -328,6 +328,7 @@ Start-Sleep -Seconds 2
 # Source: https://blogs.technet.microsoft.com/heyscriptingguy/2014/04/23/powertip-convert-json-file-to-powershell-object/
 # Source: http://powershelldistrict.com/powershell-json/
 # Source: https://technet.microsoft.com/en-us/library/ee692803.aspx
+# Source: http://stackoverflow.com/questions/32887583/powershell-v2-converts-dictionary-to-array-when-returned-from-a-function
 
 <#
 
@@ -356,7 +357,18 @@ If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).M
     # PowerShell v2 or earlier JSON import                                                    # Credit: Goyuix: "Read Json Object in Powershell 2.0"
     # Requires .NET 3.5 or later
     $powershell_v2_or_earlier = $true
-    [System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions") | Out-Null
+
+            If (($PSVersionTable.PSVersion).Major -eq $null) {
+                $powershell_v1 = $true
+                # LoadWithPartialName is obsolete, source: https://msdn.microsoft.com/en-us/library/system.reflection.assembly(v=vs.110).aspx
+                [System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
+            } ElseIf (($PSVersionTable.PSVersion).Major -lt 3) {
+                $powershell_v2 = $true
+                Add-Type -AssemblyName "System.Web.Extensions"
+            } Else {
+                $continue = $true
+            } # else
+
     $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
     $latest = $serializer.DeserializeObject((Get-Content -Path $baseline_file) -join "`n")
     $history = $serializer.DeserializeObject((Get-Content -Path $history_file) -join "`n")
@@ -1939,6 +1951,7 @@ http://stackoverflow.com/questions/10941756/powershell-show-elapsed-time
 http://stackoverflow.com/questions/1825585/determine-installed-powershell-version?rq=1
 https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-json
 https://blogs.technet.microsoft.com/heyscriptingguy/2014/04/23/powertip-convert-json-file-to-powershell-object/
+http://stackoverflow.com/questions/32887583/powershell-v2-converts-dictionary-to-array-when-returned-from-a-function
 http://powershelldistrict.com/powershell-json/
 https://technet.microsoft.com/en-us/library/ff730939.aspx
 https://technet.microsoft.com/en-us/library/ee692803.aspx
