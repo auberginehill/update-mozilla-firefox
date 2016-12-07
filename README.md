@@ -405,6 +405,9 @@
         <td style="padding:6px"><a href="https://blogs.technet.microsoft.com/heyscriptingguy/2014/04/23/powertip-convert-json-file-to-powershell-object/">PowerTip: Convert JSON File to PowerShell Object</a></td>
     </tr>
     <tr>
+        <td style="padding:6px"><a href="http://stackoverflow.com/questions/32887583/powershell-v2-converts-dictionary-to-array-when-returned-from-a-function">PowerShell v2 Converts Dictionary to Array when returned from a functiont</a></td>
+    </tr>    
+    <tr>
         <td style="padding:6px"><a href="http://powershelldistrict.com/powershell-json/">Working with JSON and PowerShell</a></td>
     </tr>
     <tr>
