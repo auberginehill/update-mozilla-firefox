@@ -1728,7 +1728,7 @@ http://stackoverflow.com/questions/10941756/powershell-show-elapsed-time        
 <#
 
 .SYNOPSIS
-Retrieves the latest Mozilla Firefox version numbers from the Interwebs, and looks
+Retrieves the latest Mozilla Firefox version numbers from the Internets, and looks
 for the installed Firefox versions on the system. If an outdated Firefox version
 is found, tries to update Firefox.
 
