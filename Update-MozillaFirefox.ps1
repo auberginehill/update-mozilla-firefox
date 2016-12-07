@@ -26,7 +26,7 @@ https://download.mozilla.org/?product=firefox-latest&os=win&lang=en-US
 http://www.mozilla.org/firefox/organizations/all/
 https://www.mozilla.org/en-US/firefox/all/
 
-# Check if the installed version of Firefox is the latest:
+Check if the installed version of Firefox is the latest:
 https://www.mozilla.org/en-US/firefox/new/
 
 Uninstall Firefox:
@@ -346,7 +346,7 @@ Start-Sleep -Seconds 2
 
         release: The release channel will provide stable release versions, including security updates (e.g. Firefox 2.0, 2.0.0.4 etc.).
 
-    # Source: http://kb.mozillazine.org/Software_Update
+    Source: http://kb.mozillazine.org/Software_Update
 
 #>
 
@@ -997,7 +997,7 @@ Write-Progress -Id $id -Activity $activity -Status $status -CurrentOperation $ta
 
 # Step 14
 # Write the Firefox installation configuration ini file
-# Keep the default save location and the default shortcuts, but disable the Mozilla Maintenance service.
+# Description: Keep the default save location and the default shortcuts, but disable the Mozilla Maintenance service.
 # Source: https://wiki.mozilla.org/Installer:Command_Line_Arguments
 
 <#
