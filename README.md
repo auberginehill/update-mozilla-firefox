@@ -49,7 +49,7 @@
    </tr>
    <tr>
       <td style="padding:6px"><strong>Version:</strong></td>
-      <td style="padding:6px">1.0</td>
+      <td style="padding:6px">1.1</td>
    </tr>
    <tr>
         <td style="padding:6px"><strong>Sources:</strong></td>
@@ -368,7 +368,7 @@
         <td style="padding:6px"><a href="https://github.com/auberginehill/update-mozilla-firefox">Script Homepage</a></td>
     </tr>
     <tr>
-        <th rowspan="19"></th>    
+        <th rowspan="20"></th>    
         <td style="padding:6px">Tobias Weltner: <a href="http://powershell.com/cs/PowerTips_Monthly_Volume_8.pdf#IDERA-1702_PS-PowerShellMonthlyTipsVol8-jan2014">PowerTips Monthly vol 8 January 2014</a> (or one of the <a href="https://web.archive.org/web/20150110213108/http://powershell.com/cs/media/p/30542.aspx">archive.org versions</a>)</td>
     </tr>
     <tr>
@@ -392,6 +392,9 @@
     <tr>
         <td style="padding:6px">Microsoft TechNet: <a href="https://technet.microsoft.com/en-us/library/ff730939.aspx">Adding a Simple Menu to a Windows PowerShell Script</a></td>
     </tr>
+    <tr>
+        <td style="padding:6px">Microsoft TechNet: <a href="https://technet.microsoft.com/en-us/library/ee692803.aspx">Working with Hash Tables</a></td>
+    </tr>        
     <tr>
         <td style="padding:6px"><a href="http://stackoverflow.com/questions/1825585/determine-installed-powershell-version?rq=1">Determine installed PowerShell version</a></td>
     </tr>
@@ -426,24 +429,6 @@
         <td style="padding:6px">ASCII Art: <a href="http://www.figlet.org/">http://www.figlet.org/</a> and <a href="http://www.network-science.de/ascii/">ASCII Art Text Generator</a></td>
     </tr>
 </table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
