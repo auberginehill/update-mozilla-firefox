@@ -327,6 +327,7 @@ Start-Sleep -Seconds 2
 # Source: https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-json
 # Source: https://blogs.technet.microsoft.com/heyscriptingguy/2014/04/23/powertip-convert-json-file-to-powershell-object/
 # Source: http://powershelldistrict.com/powershell-json/
+# Source: https://technet.microsoft.com/en-us/library/ee692803.aspx
 
 <#
 
@@ -354,12 +355,14 @@ If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).M
 
     # PowerShell v2 or earlier JSON import                                                    # Credit: Goyuix: "Read Json Object in Powershell 2.0"
     # Requires .NET 3.5 or later
-    [System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
+    $powershell_v2_or_earlier = $true
+    [System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions") | Out-Null
     $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
-    $latest = $serializer.DeserializeObject((Get-Content -Raw -Path $baseline_file))
-    $history = $serializer.DeserializeObject((Get-Content -Raw -Path $history_file))
-    $language = $serializer.DeserializeObject((Get-Content -Raw -Path $language_file))
-    $region = $serializer.DeserializeObject((Get-Content -Raw -Path $region_file))
+    $latest = $serializer.DeserializeObject((Get-Content -Path $baseline_file) -join "`n")
+    $history = $serializer.DeserializeObject((Get-Content -Path $history_file) -join "`n")
+    $language = $serializer.DeserializeObject((Get-Content -Path $language_file) -join "`n")
+    $region = $serializer.DeserializeObject((Get-Content -Path $region_file) -join "`n")
+    $latest_release_date = (Get-Date ($history.Get_Item("$($latest.LATEST_FIREFOX_VERSION)"))).ToShortDateString()
 
 } ElseIf (($PSVersionTable.PSVersion).Major -ge 3) {
 
@@ -368,6 +371,7 @@ If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).M
     $history = (Get-Content -Raw -Path $history_file) | ConvertFrom-Json
     $language = (Get-Content -Raw -Path $language_file) | ConvertFrom-Json
     $region = (Get-Content -Raw -Path $region_file) | ConvertFrom-Json
+    $latest_release_date = (Get-Date ($history | Select-Object -ExpandProperty "$($latest.LATEST_FIREFOX_VERSION)")).ToShortDateString()
 
 } Else {
     $continue = $true
@@ -381,15 +385,14 @@ If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).M
                         'Extended-Support Release (ESR)'        = $latest.FIREFOX_ESR
                         'Extended-Support Release (ESR) Next'   = $latest.FIREFOX_ESR_NEXT
                         'Old'                                   = $latest.LATEST_FIREFOX_OLDER_VERSION
-                        'Latest Release Date'                   = (Get-Date ($history | Select-Object -ExpandProperty "$($latest.LATEST_FIREFOX_VERSION)")).ToShortDateString()
+                        'Latest Release Date'                   = $latest_release_date
                         'Release History'                       = "https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json"
                         'History'                               = "https://www.mozilla.org/en-US/firefox/releases/"
                         'Info'                                  = [string]"https://www.mozilla.org/en-US/firefox/" + $latest.LATEST_FIREFOX_VERSION + "/releasenotes/"
                         'Current'                               = $latest.LATEST_FIREFOX_VERSION
                     } # New-Object
                 $obj_firefox_latest.PSObject.TypeNames.Insert(0,"Latest Firefox Versions")
-                $most_recent_firefox_version = $obj_firefox_latest.Current
-
+                $most_recent_firefox_version = $obj_firefox_latest | Select-Object -ExpandProperty Current
 
         # Display the most recent and extended support Firefox version numbers in console
         If ($obj_firefox_latest -ne $null) {
@@ -423,6 +426,7 @@ If ($firefox_is_installed -eq $true) {
     $all_64_bit_firefoxes = $obj_firefox_enumeration | Where-Object { $_.Type -eq "64-bit" }
     $number_of_64_bit_firefoxes = ($all_64_bit_firefoxes | Measure-Object).Count
 
+
     # 32-bit
     If ($32_bit_firefox_is_installed -eq $false) {
         $continue = $true
@@ -430,23 +434,35 @@ If ($firefox_is_installed -eq $true) {
     } ElseIf (($32_bit_firefox_is_installed -eq $true) -and ($most_recent_32_bit_firefox_already_exists) -and ($number_of_32_bit_firefoxes -eq 1)) {
 
         # $downloading_firefox_32_is_required = $false
+        $locale = If (($most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[-1] -match "\(") -eq $false) {
+                        If ($powershell_v2_or_earlier -eq $true) {
+                            $language.Get_Item(($most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
+                        } Else {
+                            $language | Select-Object -ExpandProperty (($most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
+                        } # else
+
+                    } Else {
+                        $continue = $true
+                    } # else ($locale)
+
+        If ($powershell_v2_or_earlier -eq $true) {
+            $release_date = $history.Get_Item($most_recent_32_bit_firefox_already_exists.DisplayVersion)
+        } Else {
+            $release_date = $history | Select-Object -ExpandProperty $most_recent_32_bit_firefox_already_exists.DisplayVersion
+        } # else
 
                             $obj_32_installed_current += New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $most_recent_32_bit_firefox_already_exists.DisplayName.replace("(TM)","")
                                 'Publisher'                     = $most_recent_32_bit_firefox_already_exists.Publisher
                                 'Product'                       = $most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[1]
                                 'Type'                          = "32-bit"
-                                'Locale'                        = If (($most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[-1] -match "\(") -eq $false) {
-                                                                        $language | Select-Object -ExpandProperty (($most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
-                                                                    } Else {
-                                                                        $continue = $true
-                                                                    } # else
+                                'Locale'                        = $locale
                                 'Computer'                      = $computer
                                 'Install Location'              = $most_recent_32_bit_firefox_already_exists.InstallLocation
                                 'Release Notes'                 = $most_recent_32_bit_firefox_already_exists.URLUpdateInfo
                                 'Standard Uninstall String'     = $most_recent_32_bit_firefox_already_exists.UninstallString.Trim('"')
                                 'Identifying Number'            = $most_recent_32_bit_firefox_already_exists.PSChildName
-                                'Release_Date'                  = $history | Select-Object -ExpandProperty $most_recent_32_bit_firefox_already_exists.DisplayVersion
+                                'Release_Date'                  = $release_date
                                 'Version'                       = $most_recent_32_bit_firefox_already_exists.DisplayVersion
 
                             } # New-Object
@@ -462,7 +478,13 @@ If ($firefox_is_installed -eq $true) {
         ForEach ($32_bit_firefox in $all_32_bit_firefoxes) {
 
             If ($32_bit_firefox.Version -eq $most_recent_firefox_version) {
-                $release_date_32 = $history | Select-Object -ExpandProperty "$($32_bit_firefox.Version)"
+
+                        If ($powershell_v2_or_earlier -eq $true) {
+                            $release_date = $history.Get_Item($32_bit_firefox.Version)
+                        } Else {
+                            $release_date_32 = $history | Select-Object -ExpandProperty "$($32_bit_firefox.Version)"
+                        } # else
+
                 $empty_line | Out-String
                 Write-Output "Currently (until the next Firefox version is released) the 32-bit $($32_bit_firefox.Name) released on $((Get-Date ($release_date_32)).ToShortDateString()) doesn't need any further maintenance or care."
             } Else {
@@ -484,23 +506,35 @@ If ($firefox_is_installed -eq $true) {
     } ElseIf (($64_bit_firefox_is_installed -eq $true) -and ($most_recent_64_bit_firefox_already_exists) -and ($number_of_64_bit_firefoxes -eq 1)) {
 
         # $downloading_firefox_64_is_required = $false
+        $locale = If (($most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[-1] -match "\(") -eq $false) {
+                        If ($powershell_v2_or_earlier -eq $true) {
+                            $language.Get_Item(($most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
+                        } Else {
+                            $language | Select-Object -ExpandProperty (($most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
+                        } # else
+
+                    } Else {
+                        $continue = $true
+                    } # else ($locale)
+
+        If ($powershell_v2_or_earlier -eq $true) {
+            $release_date = $history.Get_Item($most_recent_64_bit_firefox_already_exists.DisplayVersion)
+        } Else {
+            $release_date = $history | Select-Object -ExpandProperty $most_recent_64_bit_firefox_already_exists.DisplayVersion
+        } # else
 
                             $obj_64_installed_current += New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $most_recent_64_bit_firefox_already_exists.DisplayName.replace("(TM)","")
                                 'Publisher'                     = $most_recent_64_bit_firefox_already_exists.Publisher
                                 'Product'                       = $most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[1]
                                 'Type'                          = "64-bit"
-                                'Locale'                        = If (($most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[-1] -match "\(") -eq $false) {
-                                                                        $language | Select-Object -ExpandProperty (($most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
-                                                                    } Else {
-                                                                        $continue = $true
-                                                                    } # else
+                                'Locale'                        = $locale
                                 'Computer'                      = $computer
                                 'Install Location'              = $most_recent_64_bit_firefox_already_exists.InstallLocation
                                 'Release Notes'                 = $most_recent_64_bit_firefox_already_exists.URLUpdateInfo
                                 'Standard Uninstall String'     = $most_recent_64_bit_firefox_already_exists.UninstallString.Trim('"')
                                 'Identifying Number'            = $most_recent_64_bit_firefox_already_exists.PSChildName
-                                'Release_Date'                  = $history | Select-Object -ExpandProperty $most_recent_64_bit_firefox_already_exists.DisplayVersion
+                                'Release_Date'                  = $release_date
                                 'Version'                       = $most_recent_64_bit_firefox_already_exists.DisplayVersion
 
                             } # New-Object
@@ -516,7 +550,13 @@ If ($firefox_is_installed -eq $true) {
         ForEach ($64_bit_firefox in $all_64_bit_firefoxes) {
 
             If ($64_bit_firefox.Version -eq $most_recent_firefox_version) {
-                $release_date_64 = $history | Select-Object -ExpandProperty "$($64_bit_firefox.Version)"
+
+                        If ($powershell_v2_or_earlier -eq $true) {
+                            $release_date_64 = $history.Get_Item($64_bit_firefox.Version)
+                        } Else {
+                            $release_date_64 = $history | Select-Object -ExpandProperty "$($64_bit_firefox.Version)"
+                        } # else
+
                 $empty_line | Out-String
                 Write-Output "Currently (until the next Firefox version is released) the 64-bit $($64_bit_firefox.Name) released on $((Get-Date ($release_date_64)).ToShortDateString()) doesn't need any further maintenance or care."
             } Else {
@@ -1521,23 +1561,35 @@ If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq
     } ElseIf ($most_recent_firefox_after_update) {
 
         $success = $true
+        $locale = If (($most_recent_firefox_after_update.DisplayName.Split(" ")[-1] -match "\(") -eq $false) {
+                        If ($powershell_v2_or_earlier -eq $true) {
+                            $language.Get_Item(($most_recent_firefox_after_update.DisplayName.Split(" ")[-1]).Replace(")",""))
+                        } Else {
+                            $language | Select-Object -ExpandProperty (($most_recent_firefox_after_update.DisplayName.Split(" ")[-1]).Replace(")",""))
+                        } # else
+
+                    } Else {
+                        $continue = $true
+                    } # else ($locale)
+
+        If ($powershell_v2_or_earlier -eq $true) {
+            $release_date = $history.Get_Item($most_recent_firefox_after_update.DisplayVersion)
+        } Else {
+            $release_date = $history | Select-Object -ExpandProperty $most_recent_firefox_after_update.DisplayVersion
+        } # else
 
                             $obj_success_firefox += New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $most_recent_firefox_after_update.DisplayName.replace("(TM)","")
                                 'Publisher'                     = $most_recent_firefox_after_update.Publisher
                                 'Product'                       = $most_recent_firefox_after_update.DisplayName.Split(" ")[1]
                                 'Type'                          = $obj_firefox_after_update.Type
-                                'Locale'                        = If (($most_recent_firefox_after_update.DisplayName.Split(" ")[-1] -match "\(") -eq $false) {
-                                                                        $language | Select-Object -ExpandProperty (($most_recent_firefox_after_update.DisplayName.Split(" ")[-1]).Replace(")",""))
-                                                                    } Else {
-                                                                        $continue = $true
-                                                                    } # else
+                                'Locale'                        = $locale
                                 'Computer'                      = $computer
                                 'Install_Location'              = $most_recent_firefox_after_update.InstallLocation
                                 'Release Notes'                 = $most_recent_firefox_after_update.URLUpdateInfo
                                 'Standard Uninstall String'     = $most_recent_firefox_after_update.UninstallString.Trim('"')
                                 'Identifying Number'            = $most_recent_firefox_after_update.PSChildName
-                                'Release_Date'                  = $history | Select-Object -ExpandProperty $most_recent_firefox_after_update.DisplayVersion
+                                'Release_Date'                  = $release_date
                                 'Version'                       = $most_recent_firefox_after_update.DisplayVersion
 
                             } # New-Object
@@ -1827,7 +1879,7 @@ http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-locatio
 
     Homepage:           https://github.com/auberginehill/update-mozilla-firefox
     Short URL:          http://tinyurl.com/gr75tjx
-    Version:            1.0
+    Version:            1.1
 
 .EXAMPLE
 ./Update-MozillaFirefox
@@ -1889,6 +1941,7 @@ https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.u
 https://blogs.technet.microsoft.com/heyscriptingguy/2014/04/23/powertip-convert-json-file-to-powershell-object/
 http://powershelldistrict.com/powershell-json/
 https://technet.microsoft.com/en-us/library/ff730939.aspx
+https://technet.microsoft.com/en-us/library/ee692803.aspx
 https://www.credera.com/blog/technology-insights/perfect-progress-bars-for-powershell/
 http://kb.mozillazine.org/Software_Update
 https://wiki.mozilla.org/Installer:Command_Line_Arguments
