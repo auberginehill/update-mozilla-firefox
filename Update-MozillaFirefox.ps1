@@ -1736,47 +1736,45 @@ is found, tries to update Firefox.
 Update-MozillaFirefox downloads a list of the most recent Firefox version numbers
 against which it compares the Firefox version numbers found on the system and
 displays, whether a Firefox update is needed or not. The actual update process
-naturally needs elevated rights, and if a working Internet connection is not
-found, Update-MozillaFirefox will exit at Step 6. Update-MozillaFirefox detects
-the installed Firefox(es) by querying the Windows registry for installed programs.
-The keys from
+naturally requires elevated rights and a working Internet connection.
+Update-MozillaFirefox detects the installed Firefox(es) by querying the Windows
+registry for installed programs. The keys from
 HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ and
 HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ are read on 64-bit
-computers and on the 32-bit computers only the latter path is accessed. If all
-the detected Firefox versions seem to be up-to-date, Update-MozillaFirefox will,
-however, exit before checking, whether it is run elevated or not. Thus, if
-Update-MozillaFirefox is run in a up-to-date machine in a 'normal' PowerShell
-window, Update-MozillaFirefox will just check that everything is OK and leave
-without further ceremony.
+computers and on the 32-bit computers only the latter path is accessed. When run
+in a 'normal' PowerShell window, when all the detected Firefox versions are
+up-to-date, Update-MozillaFirefox will just check that everything is OK and leave
+without further ceremony at Step 11 (before trying to determine, whether it is run
+elevated or not).
 
 Update-MozillaFirefox tries to write several Firefox-related files, namely
 "firefox_current_versions.json", "firefox_release_history.json",
-"firefox_languages.json" and "firefox_regions.json" in Step 7. If the script has
-advanced to the updating phase, in Step 14 an Install Configuration File
-(firefox_configuration.ini) is also written to $path.
+"firefox_languages.json" and "firefox_regions.json" at Step 7. If the script
+has advanced to the updating phase, at Step 14 an Install Configuration File
+(firefox_configuration.ini) is also written to $path, where, for instance, the
+automatic Mozilla Maintenance service is disabled and the default shortcuts are
+enabled.
 
-If Update-MozillaFirefox is run without elevated rights (but with a working Internet
-connection) in a machine with an old Firefox version, it will be shown that a
-Firefox update is needed, but Update-MozillaFirefox will exit at Step 12 before
-actually downloading any files. To perform an update with Update-MozillaFirefox,
+If Update-MozillaFirefox is run without elevated rights (but with a working
+Internet connection) in a machine with an old Firefox version, it will be shown
+that a Firefox update is needed, but Update-MozillaFirefox will exit at Step 12
+before downloading any files. To perform an update with Update-MozillaFirefox,
 PowerShell has to be run in an elevated window (run as an administrator).
 
-If Update-MozillaFirefox is run in an elevated PowerShell window and no Firefox is
-detected, the script offers the option to install Firefox in the "Admin Corner",
-where, in contrary to the main autonomous nature of Update-MozillaFirefox, an
-end-user input is required for selecting the bit-version and the language. In the
-"Admin Corner", one instance of either 32-bit or 64-bit version in the selected
-language is installable with Update-MozillaFirefox - the provided language selection
-covers over 30 languages.
+If Update-MozillaFirefox is run in an elevated PowerShell window and no Firefox
+is detected, the script offers the option to install Firefox in the "Admin Corner"
+(step 11), where, in contrary to the main autonomous nature of
+Update-MozillaFirefox, an end-user input is required for selecting the bit-version
+and the language. In the "Admin Corner", one instance of either 32-bit or 64-bit
+version in the selected language is installable with Update-MozillaFirefox
+– the language selection covers over 30 languages.
 
-In the update procedure itself (if an old Firefox version has been found and
-Update-MozillaFirefox is run with administrative rights) Update-MozillaFirefox
-downloads a full Firefox installer from Mozilla, which is of the same type that
-is already installed on the system (same bit version and language). After writing
-the Install Configuration File (firefox_configuration.ini in Step 14) and stopping
-several Firefox-related processes Update-MozillaFirefox installs the downloaded
-Firefox on top of the existing Firefox installation, which should trigger the
-in-built update procedure.
+In the update procedure itself Update-MozillaFirefox downloads a full Firefox
+installer from Mozilla, which is equal to the type that is already installed on
+the system (same bit version and language). After writing the Install Configuration
+File (firefox_configuration.ini at Step 14) and stopping several Firefox-related
+processes Update-MozillaFirefox installs the downloaded Firefox on top of the
+existing Firefox installation, which triggers the in-built update procedure.
 
 .OUTPUTS
 Displays Firefox related information in console. Tries to update an outdated Firefox
@@ -1789,20 +1787,20 @@ The Firefox Install Configuration File (firefox_configuration.ini) is created wi
 one active parameter (other parameters inside the file are commented out):
 
 
-    Install Configuration File (in Step 14):
+    Install Configuration File (at Step 14):
 
 
         firefox_configuration.ini           %TEMP%\firefox_configuration.ini
 
 
     The %TEMP% location represents the current Windows temporary file folder.
-    Please see the Notes-section below, how to determine where the current Windows
-    temporary file folder is located. In PowerShell the command $env:temp displays
-    the temp-folder path.
+    In PowerShell, for instance the the command $env:temp displays the temp-folder
+    path.
 
 
-To see the actual values that are being written, please see Step 14 above (altering
-the duplicated value below won't affect the script in any meaningful way)
+To see the actual values that are being written, please see the Step 14 above,
+where the following value is written: (altering the duplicated value below won't
+affect the script in any meaningful way)
 
 
     MaintenanceService=false    The MozillaMaintenance service is used for silent
@@ -1822,7 +1820,7 @@ At Step 7 the baseline Firefox version numbers are written to a file
 are created, namely:
 
 
-    Firefox JSON Files (in Step 7):
+    Firefox JSON Files (at Step 7):
 
 
         firefox_current_versions.json       %TEMP%\firefox_current_versions.json
@@ -1832,9 +1830,8 @@ are created, namely:
 
 
     The %TEMP% location represents the current Windows temporary file folder.
-    Please see the Notes-section below, how to determine where the current Windows
-    temporary file folder is located. In PowerShell the command $env:temp displays
-    the temp-folder path.
+    In PowerShell, for instance the the command $env:temp displays the temp-folder
+    path.
 
 
 To open these file locations in a Resource Manager Window, for instance a command
@@ -1850,11 +1847,9 @@ Requires either (a) PowerShell v3 or later or (b) .NET 3.5 or later for importin
 and converting JSON-files (at Step 8).
 
 Requires a working Internet connection for downloading a list of the most recent
-Firefox version numbers.
-
-Also requires a working Internet connection for downloading a complete Firefox
-installer from Mozilla (but this procedure is not initiated, if the system is
-deemed up-to-date).
+Firefox version numbers and for downloading a complete Firefox installer from
+Mozilla (but the latter procedure is not initiated, if the system is deemed
+up-to-date).
 
 For performing any actual updates with Update-MozillaFirefox, it's mandatory to
 run this script in an elevated PowerShell window (where PowerShell has been started
@@ -1866,15 +1861,18 @@ than one instances of Firefox are detected, the script will notify the user in
 Step 5, and furthermore, if old Firefox(es) are detected, the script will exit
 before downloading the installation file at Step 15.
 
-Please also notice that during the actual update phase Update-MozillaFirefox
-closes a bunch of processes without any further notice in Step 17 and in Step 14
-the Firefox installation configuration file is written, so that the Mozilla
-Maintenance service will not be installed during the Firefox update.
+Please note that the Firefox installation configuration file written at Step 14
+disables the Mozilla Maintenance service so that the Mozilla Maintenance service
+will not be installed during the Firefox update. The values set with the Install
+Configuration File (firefox_configuration.ini) are altering the system files and
+seemingly are written somewhere deeper to the innards of Mozilla Firefox
+semi-permanently.
 
-Please note that when run in an elevated PowerShell window and an old Firefox
-version is detected, Update-MozillaFirefox will automatically try to download files
-from the Internet without prompting the end-user beforehand or without asking any
-confirmations (in Step 16 and onwards).
+Please also notice that when run in an elevated PowerShell window and an old
+Firefox version is detected, Update-MozillaFirefox will automatically try to
+download files from the Internet without prompting the end-user beforehand or
+without asking any confirmations (at Step 16 and onwards) and at Step 17 closes
+a bunch of processes without any further notice.
 
 Please note that the downloaded files are placed in a directory, which is specified
 with the $path variable (at line 42). The $env:temp variable points to the current
