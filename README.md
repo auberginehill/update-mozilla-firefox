@@ -32,15 +32,15 @@
    </tr>
    <tr>
       <td style="padding:6px"><strong>Description:</strong></td>
-      <td style="padding:6px">Update-MozillaFirefox downloads a list of the most recent Firefox version numbers against which it compares the Firefox version numbers found on the system and displays, whether a Firefox update is needed or not. The actual update process naturally needs elevated rights, and if a working Internet connection is not found, Update-MozillaFirefox will exit at Step 6. Update-MozillaFirefox detects the installed Firefox(es) by querying the Windows registry for installed programs. The keys from <code>HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\</code> and <code>HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\</code> are read on 64-bit computers and on the 32-bit computers only the latter path is accessed. If all the detected Firefox versions seem to be up-to-date, Update-MozillaFirefox will, however, exit before checking, whether it is run elevated or not. Thus, if Update-MozillaFirefox is run in a up-to-date machine in a 'normal' PowerShell window, Update-MozillaFirefox will just check that everything is OK and leave without further ceremony.
+      <td style="padding:6px">Update-MozillaFirefox downloads a list of the most recent Firefox version numbers against which it compares the Firefox version numbers found on the system and displays, whether a Firefox update is needed or not. The actual update process naturally requires elevated rights, and if a working Internet connection is not found, Update-MozillaFirefox will exit at Step 6. Update-MozillaFirefox detects the installed Firefox(es) by querying the Windows registry for installed programs. The keys from <code>HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\</code> and <code>HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\</code> are read on 64-bit computers and on the 32-bit computers only the latter path is accessed. When run in a 'normal' PowerShell window, and all the detected Firefox versions are up-to-date, Update-MozillaFirefox will just check that everything is OK and leave without further ceremony at Step 11 (before trying to determine, whether it is run elevated or not).
       <br />
-      <br />Update-MozillaFirefox tries to write several Firefox-related files, namely "<code>firefox_current_versions.json</code>", "<code>firefox_release_history.json</code>", "<code>firefox_languages.json</code>" and "<code>firefox_regions.json</code>" in Step 7. If the script has advanced to the updating phase, in Step 14 an Install Configuration File (<code>firefox_configuration.ini</code>) is also written to <code>$path</code>.
+      <br />Update-MozillaFirefox tries to write several Firefox-related files, namely "<code>firefox_current_versions.json</code>", "<code>firefox_release_history.json</code>", "<code>firefox_languages.json</code>" and "<code>firefox_regions.json</code>" at Step 7. If the script has advanced to the updating phase, at Step 14 an Install Configuration File (<code>firefox_configuration.ini</code>) is also written to <code>$path</code>, where, for instance, the automatic Mozilla Maintenance service is disabled and the default shortcuts are enabled.
       <br />
-      <br />If Update-MozillaFirefox is run without elevated rights (but with a working Internet connection) in a machine with an old Firefox version, it will be shown that a Firefox update is needed, but Update-MozillaFirefox will exit at Step 12 before actually downloading any files. To perform an update with Update-MozillaFirefox, PowerShell has to be run in an elevated window (run as an administrator).
+      <br />If Update-MozillaFirefox is run without elevated rights (but with a working Internet connection) in a machine with an old Firefox version, it will be shown that a Firefox update is needed, but Update-MozillaFirefox will exit at Step 12 before downloading any files. To perform an update with Update-MozillaFirefox, PowerShell has to be run in an elevated window (run as an administrator).
       <br />
-      <br />If Update-MozillaFirefox is run in an elevated PowerShell window and no Firefox is detected, the script offers the option to install Firefox in the "<strong>Admin Corner</strong>", where, in contrary to the main autonomous nature of Update-MozillaFirefox, an end-user input is required for selecting the bit-version and the language. In the "Admin Corner", one instance of either 32-bit or 64-bit version in the selected language is installable with Update-MozillaFirefox – the provided language selection covers over 30 languages.
+      <br />If Update-MozillaFirefox is run in an elevated PowerShell window and no Firefox is detected, the script offers the option to install Firefox in the "<strong>Admin Corner</strong>", where, in contrary to the main autonomous nature of Update-MozillaFirefox, an end-user input is required for selecting the bit-version and the language. In the "Admin Corner", one instance of either 32-bit or 64-bit version in the selected language is installable with Update-MozillaFirefox – the language selection covers over 30 languages.
       <br />
-      <br />In the update procedure itself (if an old Firefox version has been found and Update-MozillaFirefox is run with administrative rights) Update-MozillaFirefox downloads a full Firefox installer from Mozilla, which is of the same type that is already installed on the system (same bit version and language). After writing the Install Configuration File (<code>firefox_configuration.ini</code> in Step 14) and stopping several Firefox-related processes Update-MozillaFirefox installs the downloaded Firefox on top of the existing Firefox installation, which should trigger the in-built update procedure.</td>
+      <br />In the update procedure itself Update-MozillaFirefox downloads a full Firefox installer from Mozilla, which is equal to the type that is already installed on the system (same bit version and language). After writing the Install Configuration File (<code>firefox_configuration.ini</code> at Step 14) and stopping several Firefox-related processes Update-MozillaFirefox installs the downloaded Firefox on top of the existing Firefox installation, which triggers the in-built update procedure.</td>
    </tr>
    <tr>
       <td style="padding:6px"><strong>Homepage:</strong></td>
@@ -49,7 +49,7 @@
    </tr>
    <tr>
       <td style="padding:6px"><strong>Version:</strong></td>
-      <td style="padding:6px">1.1</td>
+      <td style="padding:6px">1.2</td>
    </tr>
    <tr>
         <td style="padding:6px"><strong>Sources:</strong></td>
@@ -131,7 +131,7 @@
                     <li>The Firefox Install Configuration File (<code>firefox_configuration.ini</code>) is created with one active parameter (other parameters inside the file are commented out):</li>
                 </p>
                 <ol>
-                    <p><strong>Install Configuration File</strong> (in Step 14):</p>
+                    <p><strong>Install Configuration File</strong> (at Step 14):</p>
                     <p>
                         <table>
                             <tr>
@@ -145,10 +145,10 @@
                         </table>
                     </p>
                     <p>The <code>%TEMP%</code> location represents the current Windows temporary file folder. Please see the Notes-section below, how to determine where the current Windows
-                    temporary file folder is located. In PowerShell the command <code>$env:temp</code> displays the temp-folder path.
+                    temporary file folder is located. In PowerShell the command <code>$env:temp</code> displays the temp-folder path.</p>
                 </ol>
                 <p>
-                    <li>To see the actual values that are being written, please see Step 14 in the <a href="https://raw.githubusercontent.com/auberginehill/update-mozilla-firefox/master/Update-MozillaFirefox.ps1">script</a> itself, where the following value is written:</li>
+                    <li>To see the actual values that are being written to the Install Configuration File (<code>firefox_configuration.ini</code>), please see the Step 14 in the <a href="https://raw.githubusercontent.com/auberginehill/update-mozilla-firefox/master/Update-MozillaFirefox.ps1">script</a> itself, where the following value is written:</li>
                 </p>
                 <ol>
                     <p>
@@ -169,7 +169,7 @@
                     <li>At Step 7 the baseline Firefox version numbers are written to a file (<code>firefox_current_versions.json</code>) and also three additional auxillary JSON files are created, namely:</li>
                 </p>
                 <ol>
-                    <p><strong>Firefox JSON Files</strong> (in Step 7):</p>
+                    <p><strong>Firefox JSON Files</strong> (at Step 7):</p>
                     <p>
                         <table>
                             <tr>
@@ -201,7 +201,7 @@
                         <br />
                         <br /><code>Invoke-Item $env:temp</code>
                         <br />
-                        <br />may be used at the PowerShell prompt window <code>[PS>]</code>.
+                        <br />may be used at the PowerShell prompt window <code>[PS&gt;]</code>.
                     </li>
                 </p>
             </ul>
@@ -228,29 +228,26 @@
         <td style="padding:6px">
             <ul>
                 <p>
-                    <li>Requires a working Internet connection for downloading a list of the most recent Firefox version numbers.</li>
-                </p>
-                <p>
-                    <li>Also requires a working Internet connection for downloading a complete Firefox installer from Mozilla (but this procedure is not initiated, if the system is deemed up-to-date).</li>
+                    <li>Requires a working Internet connection for downloading a list of the most recent Firefox version numbers and for downloading a complete Firefox installer from Mozilla (but the latter procedure is not initiated, if the system is deemed up-to-date).</li>
                 </p>
                 <p>
                     <li>For performing any actual updates with Update-MozillaFirefox, it's mandatory to run this script in an elevated PowerShell window (where PowerShell has been started with the 'run as an administrator' option). The elevated rights are needed for installing Firefox on top of the exising Firefox installation.</li>
                 </p>
                 <p>
-                    <li>Update-MozillaFirefox is designed to update only one instance of Firefox. If more than one instances of Firefox are detected, the script will notify the user in Step 5, and furthermore, if old Firefox(es) are detected, the script will exit before downloading the installation file at Step 15.</li>
+                    <li>Update-MozillaFirefox is designed to update only one instance of Firefox. If more than one instances of Firefox are detected, the script will notify the user at Step 5, and furthermore, if old Firefox(es) are detected, the script will exit before downloading the installation file at Step 15.</li>
                 </p>
                 <p>
-                    <li>Please also notice that during the actual update phase Update-MozillaFirefox closes a bunch of processes without any further notice in Step 17 and in Step 14 the Firefox installation configuration file is written, so that the Mozilla Maintenance service will not be installed during the Firefox update.</li>
+                    <li>Please note that the Firefox installation configuration file written at Step 14 disables the Mozilla Maintenance service so that the Mozilla Maintenance service will not be installed during the Firefox update. The values set with the Install Configuration File (<code>firefox_configuration.ini</code>) are altering the system files and seemingly are written somewhere deeper to the innards of Firefox semi-permanently.</li>
                 </p>
                 <p>
-                    <li>Please note that when run in an elevated PowerShell window and an old Firefox version is detected, Update-MozillaFirefox will automatically try to download files from the Internet without prompting the end-user beforehand or without asking any confirmations (in Step 16 and onwards).</li>
+                    <li>Please also notice that when run in an elevated PowerShell window and an old Firefox version is detected, Update-MozillaFirefox will automatically try to download files from the Internet without prompting the end-user beforehand or without asking any confirmations (at Step 16 and onwards) and at Step 17 closes a bunch of processes without any further notice. </li>
                 </p>
                 <p>
                     <li>Please note that the downloaded files are placed in a directory, which is specified with the <code>$path</code> variable (at line 42). The <code>$env:temp</code> variable points to the current temp folder. The default value of the <code>$env:temp</code> variable is <code>C:\Users\&lt;username&gt;\AppData\Local\Temp</code> (i.e. each user account has their own separate temp folder at path <code>%USERPROFILE%\AppData\Local\Temp</code>). To see the current temp path, for instance a command
                     <br />
                     <br /><code>[System.IO.Path]::GetTempPath()</code>
                     <br />
-                    <br />may be used at the PowerShell prompt window <code>[PS>]</code>. To change the temp folder for instance to <code>C:\Temp</code>, please, for example, follow the instructions at <a href="http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-location-windows.html">Temporary Files Folder - Change Location in Windows</a>, which in essence are something along the lines:
+                    <br />may be used at the PowerShell prompt window <code>[PS&gt;]</code>. To change the temp folder for instance to <code>C:\Temp</code>, please, for example, follow the instructions at <a href="http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-location-windows.html">Temporary Files Folder - Change Location in Windows</a>, which in essence are something along the lines:
                         <ol>
                            <li>Right click on Computer and click on Properties (or select Start → Control Panel → System). In the resulting window with the basic information about the computer...</li>
                            <li>Click on Advanced system settings on the left panel and select Advanced tab on the resulting pop-up window.</li>
@@ -289,7 +286,7 @@
                 </p>
                 <p>
                     <li><p><code>Set-ExecutionPolicy remotesigned</code><br />
-                    This command is altering the Windows PowerShell rights to enable script execution. Windows PowerShell has to be run with elevated rights (run as an administrator) to actually be able to change the script execution properties. The default value is "<code>Set-ExecutionPolicy restricted</code>".</p>
+                    This command is altering the Windows PowerShell rights to enable script execution for the default (LocalMachine) scope. Windows PowerShell has to be run with elevated rights (run as an administrator) to actually be able to change the script execution properties. The default value of the default (LocalMachine) scope is "<code>Set-ExecutionPolicy restricted</code>".</p>
                         <p>Parameters:
                                 <ol>
                                     <table>
@@ -320,13 +317,16 @@
                                     </table>
                                 </ol>
                         </p>
-                    <p>For more information, please type "<code>Get-ExecutionPolicy -List</code>" or "<code>help Set-ExecutionPolicy -Full</code>" or visit <a href="https://technet.microsoft.com/en-us/library/hh849812.aspx">Set-ExecutionPolicy</a>.</p>
+                     <p>For more information, please type "<code>Get-ExecutionPolicy -List</code>", "<code>help Set-ExecutionPolicy -Full</code>", "<code>help about_Execution_Policies</code>" or visit <a href="https://technet.microsoft.com/en-us/library/hh849812.aspx">Set-ExecutionPolicy</a> or <a href="http://go.microsoft.com/fwlink/?LinkID=135170">about_Execution_Policies</a>.</p>
                     </li>
                 </p>
                 <p>
                     <li><code>New-Item -ItemType File -Path C:\Temp\Update-MozillaFirefox.ps1</code><br />
-                    Creates an empty ps1-file to the <code>C:\Temp</code> directory. The <code>New-Item</code> cmdlet has an inherent <code>-NoClobber</code> mode built into it, so that the procedure will halt, if overwriting (replacing the contents) of an existing file is about to happen. Overwriting a file with the <code>New-Item</code> cmdlet requires using the <code>Force</code>.<br />
-                    For more information, please type "<code>help New-Item -Full</code>".</li>
+                    Creates an empty ps1-file to the <code>C:\Temp</code> directory. The <code>New-Item</code> cmdlet has an inherent <code>-NoClobber</code> mode built into it, so that the procedure will halt, if overwriting (replacing the contents) of an existing file is about to happen. Overwriting a file with the <code>New-Item</code> cmdlet requires using the <code>Force</code>. If the path name and/or the filename includes space characters, please enclose the whole <code>-Path</code> parameter value in quotation marks (single or double):
+                        <ol>
+                            <br /><code>New-Item -ItemType File -Path "C:\Folder Name\Update-MozillaFirefox.ps1"</code>
+                        </ol>
+                    <br />For more information, please type "<code>help New-Item -Full</code>".</li>
                 </p>
             </ol>
         </td>
@@ -368,7 +368,7 @@
         <td style="padding:6px"><a href="https://github.com/auberginehill/update-mozilla-firefox">Script Homepage</a></td>
     </tr>
     <tr>
-        <th rowspan="21"></th>    
+        <th rowspan="21"></th>
         <td style="padding:6px">Tobias Weltner: <a href="http://powershell.com/cs/PowerTips_Monthly_Volume_8.pdf#IDERA-1702_PS-PowerShellMonthlyTipsVol8-jan2014">PowerTips Monthly vol 8 January 2014</a> (or one of the <a href="https://web.archive.org/web/20150110213108/http://powershell.com/cs/media/p/30542.aspx">archive.org versions</a>)</td>
     </tr>
     <tr>
@@ -394,7 +394,7 @@
     </tr>
     <tr>
         <td style="padding:6px">Microsoft TechNet: <a href="https://technet.microsoft.com/en-us/library/ee692803.aspx">Working with Hash Tables</a></td>
-    </tr>        
+    </tr>
     <tr>
         <td style="padding:6px"><a href="http://stackoverflow.com/questions/1825585/determine-installed-powershell-version?rq=1">Determine installed PowerShell version</a></td>
     </tr>
@@ -406,7 +406,7 @@
     </tr>
     <tr>
         <td style="padding:6px"><a href="http://stackoverflow.com/questions/32887583/powershell-v2-converts-dictionary-to-array-when-returned-from-a-function">PowerShell v2 Converts Dictionary to Array when returned from a function</a></td>
-    </tr>    
+    </tr>
     <tr>
         <td style="padding:6px"><a href="http://powershelldistrict.com/powershell-json/">Working with JSON and PowerShell</a></td>
     </tr>
@@ -441,10 +441,13 @@
  <table>
     <tr>
         <th><img class="emoji" title="www" alt="www" height="28" width="28" align="absmiddle" src="https://assets-cdn.github.com/images/icons/emoji/unicode/0023-20e3.png"></th>
+        <td style="padding:6px"><a href="https://gist.github.com/auberginehill/aa812bfa79fa19fbd880b97bdc22e2c1">Disable-Defrag</a></td>
+    </tr>
+    <tr>
+        <th rowspan="25"></th>
         <td style="padding:6px"><a href="https://github.com/auberginehill/firefox-customization-files">Firefox Customization Files</a></td>
     </tr>
     <tr>
-        <th rowspan="15"></th>
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-ascii-table">Get-AsciiTable</a></td>
     </tr>
     <tr>
@@ -454,13 +457,25 @@
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-computer-info">Get-ComputerInfo</a></td>
     </tr>
     <tr>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/get-culture-tables">Get-CultureTables</a></td>
+    </tr>
+    <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-directory-size">Get-DirectorySize</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/get-hash-value">Get-HashValue</a></td>
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-installed-programs">Get-InstalledPrograms</a></td>
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-installed-windows-updates">Get-InstalledWindowsUpdates</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/get-powershell-aliases-table">Get-PowerShellAliasesTable</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://gist.github.com/auberginehill/9c2f26146a0c9d3d1f30ef0395b6e6f5">Get-PowerShellSpecialFolders</a></td>
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-ram-info">Get-RAMInfo</a></td>
@@ -481,10 +496,25 @@
         <td style="padding:6px"><a href="https://github.com/auberginehill/java-update">Java-Update</a></td>
     </tr>
     <tr>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/remove-duplicate-files">Remove-DuplicateFiles</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/remove-empty-folders">Remove-EmptyFolders</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://gist.github.com/auberginehill/13bb9f56dc0882bf5e85a8f88ccd4610">Remove-EmptyFoldersLite</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://gist.github.com/auberginehill/176774de38ebb3234b633c5fbc6f9e41">Rename-Files</a></td>
+    </tr>
+    <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/rock-paper-scissors">Rock-Paper-Scissors</a></td>
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/toss-a-coin">Toss-a-Coin</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/unzip-silently">Unzip-Silently</a></td>
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/update-adobe-flash-player">Update-AdobeFlashPlayer</a></td>
