@@ -1298,8 +1298,8 @@ If (($multiple_firefoxes -ne $true) -and ($admin_corner -ne $true)) {
                     } ElseIf ((($language | Select-Object -ErrorAction SilentlyContinue -ExpandProperty "$($(Get-Culture).TwoLetterISOLanguageName)").English) -match ((Get-Culture).EnglishName) ) {
                         $lang = [string]'&lang=' + $($(Get-Culture).TwoLetterISOLanguageName)
                     } Else {
-                        $continue = $true
-                    } # else
+                       $lang = [string]'&lang=' + (([Threading.Thread]::CurrentThread.CurrentUICulture).Name.Split("-")[0])
+                     } # else
 
             } Else {
                 $continue = $true
@@ -1323,7 +1323,7 @@ If (($multiple_firefoxes -ne $true) -and ($admin_corner -ne $true)) {
 If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq $true)) {
 
     $task_number = 4
-    $task = "Downloading a full offline Firefox installer..."
+    $task = "Downloading a full offline Firefox installer ($download_url)"
     Write-Progress -Id $id -Activity $activity -Status $status -CurrentOperation $task -PercentComplete (($task_number / $total_steps) * 100)
 
 
@@ -1631,7 +1631,7 @@ $task = "Verifying that the Firefox has been installed by opening a web page in 
 Write-Progress -Id $id -Activity $activity -Status $status -CurrentOperation $task -PercentComplete (($task_number / $total_steps) * 100)
 
 If ($obj_success_firefox -ne $null) {
-    Start-Process -FilePath "$($obj_success_firefox.Install_Location)\firefox.exe" -ArgumentList "https://www.mozilla.org/en-US/firefox/new/" -Wait
+    Start-Process -FilePath "$($obj_success_firefox.Install_Location)\firefox.exe" -ArgumentList "https://www.mozilla.org/en-US/firefox/new/"
 } Else {
     $continue = $true
 } # else
@@ -1891,7 +1891,7 @@ http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-locatio
 
     Homepage:           https://github.com/auberginehill/update-mozilla-firefox
     Short URL:          http://tinyurl.com/gr75tjx
-    Version:            1.1
+    Version:            1.2
 
 .EXAMPLE
 ./Update-MozillaFirefox
