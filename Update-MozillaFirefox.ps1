@@ -44,9 +44,11 @@ $computer = $env:COMPUTERNAME
 $ErrorActionPreference = "Stop"
 $start_time = Get-Date
 $empty_line = ""
-$obj_firefox_enumeration = @()
-$obj_firefox_latest = @()
-$obj_firefox_after_update = @()
+$quote ='"'
+$unquote ='"'
+$firefox_enumeration = @()
+$latest_firefox = @()
+$after_update_firefoxes = @()
 
 
 # Function to check whether a program is installed or not
@@ -78,7 +80,7 @@ If ([IntPtr]::Size -eq 8) {
     'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
     )
     $empty_line | Out-String
-} # else
+} # Else
 
 
 
@@ -90,7 +92,7 @@ If ((Check-InstalledSoftware "*Firefox*") -ne $null) {
     $firefox_is_installed = $true
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -110,7 +112,7 @@ If ($registry_paths_selection -ne $null) {
             $locale = ($item.DisplayName.Split(" ")[-1]).Replace(")","")
         } Else {
             $continue = $true
-        } # else
+        } # Else
 
 
         If (($item.DisplayName.Split(" ")[-1] -match "\(x") -eq $true) {
@@ -123,7 +125,7 @@ If ($registry_paths_selection -ne $null) {
                 $type = "64-bit"
             } Else {
                 $continue = $true
-            } # else
+            } # Else
 
         } ElseIf (($item.DisplayName.Split(" ")[-2] -match "\(x") -eq $true) {
 
@@ -135,18 +137,21 @@ If ($registry_paths_selection -ne $null) {
                 $type = "64-bit"
             } Else {
                 $continue = $true
-            } # else
+            } # Else
 
         } Else {
             $continue = $true
-        } # else
+        } # Else
 
-
+       # $product_version_enum = ((Get-ItemProperty -Path "C:\Program Files (x86)\Mozilla Firefox\Firefox.exe" -ErrorAction SilentlyContinue -Name VersionInfo).VersionInfo).ProductVersion
         $product_version_enum = ((Get-ItemProperty -Path "$($item.InstallLocation)\Firefox.exe" -ErrorAction SilentlyContinue -Name VersionInfo).VersionInfo).ProductVersion
-        $regex_build_enumeration = If ($product_version_enum -ne $null) { $product_version_enum -match "(?<C1>\d+)\.(?<C2>\d+)\.(?<C3>\d+)" } Else { $continue = $true }
+        $test_stability = $product_version_enum -match "(\d+)\.(\d+)\.(\d+)"
+        $test_major = $product_version_enum -match "(\d+)\.(\d+)"
+        If (($product_version_enum -ne $null) -and ($test_stability -eq $true)) { $product_version_enum -match "(?<C1>\d+)\.(?<C2>\d+)\.(?<C3>\d+)" } Else { $continue = $true }
+        If (($product_version_enum -ne $null) -and ($test_stability -eq $false) -and ($test_major -eq $true)) { $product_version_enum -match "(?<C1>\d+)\.(?<C2>\d+)" } Else { $continue = $true }
 
 
-                            $obj_firefox_enumeration += New-Object -TypeName PSCustomObject -Property @{
+                            $firefox_enumeration += $obj_firefox = New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $item.DisplayName.Replace("(TM)","")
                                 'Publisher'                     = $item.Publisher
                                 'Product'                       = $item.DisplayName.Split(" ")[1]
@@ -154,7 +159,7 @@ If ($registry_paths_selection -ne $null) {
                                 'Locale'                        = $locale
                                 'Major Version'                 = If ($Matches.C1 -ne $null) { $Matches.C1 } Else { $continue = $true }
                                 'Minor Version'                 = If ($Matches.C2 -ne $null) { $Matches.C2 } Else { $continue = $true }
-                                'Build Number'                  = If ($Matches.C3 -ne $null) { $Matches.C3 } Else { $continue = $true }
+                                'Build Number'                  = If ($Matches.C3 -ne $null) { $Matches.C3 } Else { "-" }
                                 'Computer'                      = $computer
                                 'Install Location'              = $item.InstallLocation
                                 'Standard Uninstall String'     = $item.UninstallString.Trim('"')
@@ -162,27 +167,26 @@ If ($registry_paths_selection -ne $null) {
                                 'Identifying Number'            = $item.PSChildName
                                 'Version'                       = $item.DisplayVersion
                             } # New-Object
-                        $obj_firefox_enumeration.PSObject.TypeNames.Insert(0,"Firefox Version Enumeration")
-
     } # foreach ($item)
 
 
         # Display the Firefox Version Enumeration in console
-        If ($obj_firefox_enumeration -ne $null) {
-            $obj_firefox_enumeration_selection = $obj_firefox_enumeration | Select-Object 'Name','Publisher','Product','Type','Locale','Major Version','Minor Version','Build Number','Computer','Install Location','Standard Uninstall String','Release Notes','Version'
+        If ($firefox_enumeration -ne $null) {
+            $firefox_enumeration.PSObject.TypeNames.Insert(0,"Firefox Version Enumeration")
+            $firefox_enumeration_selection = $firefox_enumeration | Select-Object 'Name','Publisher','Product','Type','Locale','Major Version','Minor Version','Build Number','Computer','Install Location','Standard Uninstall String','Release Notes','Version'
             $empty_line | Out-String
             $header_firefox_enumeration = "Enumeration of Firefox Versions Found on the System"
             $coline_firefox_enumeration = "---------------------------------------------------"
             Write-Output $header_firefox_enumeration
             $coline_firefox_enumeration | Out-String
-            Write-Output $obj_firefox_enumeration_selection
+            Write-Output $firefox_enumeration_selection
         } Else {
             $continue = $true
-        } # else
+        } # Else
 
 } Else {
     $continue = $true
-} # else (Step 4)
+} # Else (Step 4)
 
 
 
@@ -190,18 +194,18 @@ If ($registry_paths_selection -ne $null) {
 # Step 5
 # Warn the user if more than one instance of Firefox is installed on the system
 $multiple_firefoxes = $false
-If ((($obj_firefox_enumeration | Measure-Object Name).Count) -eq 0) {
+If ((($firefox_enumeration | Measure-Object Name).Count) -eq 0) {
     Write-Verbose "No Firefox seems to be installed on the system."
-} ElseIf ((($obj_firefox_enumeration | Measure-Object Name).Count) -eq 1) {
+} ElseIf ((($firefox_enumeration | Measure-Object Name).Count) -eq 1) {
     # One instance of Firefox seems to be installed.
     $continue = $true
-} ElseIf ((($obj_firefox_enumeration | Measure-Object Name).Count) -ge 2) {
+} ElseIf ((($firefox_enumeration | Measure-Object Name).Count) -ge 2) {
     $empty_line | Out-String
     Write-Warning "More than one instance of Firefox seems to be installed on the system."
     $multiple_firefoxes = $true
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -213,7 +217,7 @@ If (([Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]'{DCB00C01-570F-
     Return "The Internet connection doesn't seem to be working. Exiting without checking the latest Firefox version numbers or without updating Firefox (at Step 6)."
 } Else {
     Write-Verbose 'Checking the most recent Firefox version numbers from the Mozilla website...'
-} # else
+} # Else
 
 
 
@@ -239,7 +243,7 @@ $baseline_file = "$path\firefox_current_versions.json"
                 Write-Output $page_exception_text
             } Else {
                 $continue = $true
-            } # else
+            } # Else
             $empty_line | Out-String
             Return "Exiting without checking the latest Firefox version numbers or without updating Firefox (at Step 7)."
         }
@@ -263,9 +267,35 @@ $history_file = "$path\firefox_release_history.json"
                 Write-Output $page_exception_text
             } Else {
                 $continue = $true
-            } # else
+            } # Else
             $empty_line | Out-String
             Return "Exiting without checking the latest Firefox version numbers or without updating Firefox (at Step 7 while trying to download the history file)."
+        }
+
+
+
+
+# https://product-details.mozilla.org/1.0/all.json
+# https://product-details.mozilla.org/1.0/firefox.json
+$major_url = "https://product-details.mozilla.org/1.0/firefox_history_major_releases.json"
+$major_file = "$path\firefox_major_versions.json"
+
+        try
+        {
+            $download_major = New-Object System.Net.WebClient
+            $download_major.DownloadFile($major_url, $major_file)
+        }
+        catch [System.Net.WebException]
+        {
+            Write-Warning "Failed to access $major_url"
+            If (([Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]'{DCB00C01-570F-4A9B-8D69-199FDBA5723B}')).IsConnectedToInternet) -eq $true) {
+                $empty_line | Out-String
+                Write-Output $page_exception_text
+            } Else {
+                $continue = $true
+            } # Else
+            $empty_line | Out-String
+            Return "Exiting without checking the latest Firefox version numbers or without updating Firefox (at Step 7 while trying to download a file containing the major version release dates)."
         }
 
 
@@ -287,7 +317,7 @@ $language_file = "$path\firefox_languages.json"
                 Write-Output $page_exception_text
             } Else {
                 $continue = $true
-            } # else
+            } # Else
             $empty_line | Out-String
             Return "Exiting without checking the latest Firefox version numbers or without updating Firefox (at Step 7 while trying to download the languages file)."
         }
@@ -311,7 +341,7 @@ $region_file = "$path\firefox_regions.json"
                 Write-Output $page_exception_text
             } Else {
                 $continue = $true
-            } # else
+            } # Else
             $empty_line | Out-String
             Return "Exiting without checking the latest Firefox version numbers or without updating Firefox (at Step 7 while trying to download the regions file)."
         }
@@ -329,7 +359,6 @@ Start-Sleep -Seconds 2
 # Source: http://powershelldistrict.com/powershell-json/
 # Source: https://technet.microsoft.com/en-us/library/ee692803.aspx
 # Source: http://stackoverflow.com/questions/32887583/powershell-v2-converts-dictionary-to-array-when-returned-from-a-function
-
 <#
 
     Update channels - Advanced
@@ -352,6 +381,15 @@ Start-Sleep -Seconds 2
 
 #>
 
+# Join the two files containing release dates
+# Source: https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-stringdata
+# Source: https://technet.microsoft.com/en-us/library/ee692803.aspx
+$history_file_content = (Get-Content -Path $history_file)
+$history_conversion = $history_file_content.Replace("}",", ")
+$major_file_content = (Get-Content -Path $major_file)
+$major_conversion = $major_file_content.Replace("{","")
+$all_firefox = [string]$history_conversion + $major_conversion
+
 If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).Major -eq $null)) {
 
     # PowerShell v2 or earlier JSON import                                                    # Credit: Goyuix: "Read Json Object in Powershell 2.0"
@@ -367,29 +405,66 @@ If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).M
                 Add-Type -AssemblyName "System.Web.Extensions"
             } Else {
                 $continue = $true
-            } # else
+            } # Else
 
     $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
     $latest = $serializer.DeserializeObject((Get-Content -Path $baseline_file) -join "`n")
     $history = $serializer.DeserializeObject((Get-Content -Path $history_file) -join "`n")
+    $major = $serializer.DeserializeObject((Get-Content -Path $major_file) -join "`n")
+    $all_dates = $serializer.DeserializeObject(($all_firefox) -join "`n")    
     $language = $serializer.DeserializeObject((Get-Content -Path $language_file) -join "`n")
-    $region = $serializer.DeserializeObject((Get-Content -Path $region_file) -join "`n")
-    $latest_release_date = (Get-Date ($history.Get_Item("$($latest.LATEST_FIREFOX_VERSION)"))).ToShortDateString()
-
+    $region = $serializer.DeserializeObject((Get-Content -Path $region_file) -join "`n")    
+    try
+    {
+        $latest_release_date = (Get-Date ($all_dates.Get_Item("$($latest.LATEST_FIREFOX_VERSION)"))).ToShortDateString()
+    }
+    catch
+    {
+        $message = $error[0].Exception
+        Write-Verbose $message
+    }
 } ElseIf (($PSVersionTable.PSVersion).Major -ge 3) {
 
     # PowerShell v3 or later JSON import
     $latest = (Get-Content -Raw -Path $baseline_file) | ConvertFrom-Json
     $history = (Get-Content -Raw -Path $history_file) | ConvertFrom-Json
+    $major = (Get-Content -Raw -Path $major_file) | ConvertFrom-Json
+    $all_dates = ($all_firefox) | ConvertFrom-Json      
     $language = (Get-Content -Raw -Path $language_file) | ConvertFrom-Json
     $region = (Get-Content -Raw -Path $region_file) | ConvertFrom-Json
-    $latest_release_date = (Get-Date ($history | Select-Object -ExpandProperty "$($latest.LATEST_FIREFOX_VERSION)")).ToShortDateString()
-
+    try
+    {
+        $latest_release_date = (Get-Date ($all_dates | Select-Object -ExpandProperty "$($latest.LATEST_FIREFOX_VERSION)")).ToShortDateString()
+    }
+    catch
+    {
+        $message = $error[0].Exception
+        Write-Verbose $message
+    }
 } Else {
     $continue = $true
-} # else
+} # Else
 
-                    $obj_firefox_latest += New-Object -TypeName PSCustomObject -Property @{
+
+    # Had the release date not yet been resolved, convert the .json formatted dates to a hash table and try to figure out the date
+    # Source: https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-stringdata
+    # Source: https://technet.microsoft.com/en-us/library/ee692803.aspx
+    If ($latest_release_date -eq $null) {
+        $raw_conversion = $all_firefox.Replace("{","").Replace(": "," = ").Replace(",","`r`n").Replace("}","`r`n").Replace('"','')
+        $release_dates = ConvertFrom-StringData -StringData $raw_conversion
+        $release_dates_list = $release_dates.GetEnumerator() | Sort-Object Value -Descending
+
+            If ($release_dates.ContainsKey("$($latest.LATEST_FIREFOX_VERSION)")) {
+                $latest_release_date = $release_dates.Get_Item("$($latest.LATEST_FIREFOX_VERSION)")
+            } Else {
+                $latest_release_date = "[unknown]"
+            } # Else
+
+    } Else {
+        $continue = $true
+    } # Else
+
+                    $latest_firefox += $obj_latest = New-Object -TypeName PSCustomObject -Property @{
                         'Nightly'                               = $latest.FIREFOX_NIGHTLY
                         'Aurora'                                = $latest.FIREFOX_AURORA
                         'In Development'                        = $latest.LATEST_FIREFOX_DEVEL_VERSION
@@ -398,26 +473,27 @@ If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).M
                         'Extended-Support Release (ESR) Next'   = $latest.FIREFOX_ESR_NEXT
                         'Old'                                   = $latest.LATEST_FIREFOX_OLDER_VERSION
                         'Latest Release Date'                   = $latest_release_date
-                        'Release History'                       = "https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json"
+                        'Major Versions'                        = $major_url
+                        'Release History'                       = $history_url
                         'History'                               = "https://www.mozilla.org/en-US/firefox/releases/"
                         'Info'                                  = [string]"https://www.mozilla.org/en-US/firefox/" + $latest.LATEST_FIREFOX_VERSION + "/releasenotes/"
                         'Current'                               = $latest.LATEST_FIREFOX_VERSION
                     } # New-Object
-                $obj_firefox_latest.PSObject.TypeNames.Insert(0,"Latest Firefox Versions")
-                $most_recent_firefox_version = $obj_firefox_latest | Select-Object -ExpandProperty Current
+                $latest_firefox.PSObject.TypeNames.Insert(0,"Latest Firefox Versions")
+                $most_recent_firefox_version = $latest_firefox | Select-Object -ExpandProperty Current
 
         # Display the most recent and extended support Firefox version numbers in console
-        If ($obj_firefox_latest -ne $null) {
-            $obj_firefox_latest_selection = $obj_firefox_latest | Select-Object 'Nightly','Aurora','In Development','Released Beta','Extended-Support Release (ESR)','Old','Latest Release Date','Release History','History','Info','Current'
+        If ($latest_firefox -ne $null) {
+            $latest_firefox_selection = $latest_firefox | Select-Object 'Nightly','Aurora','In Development','Released Beta','Extended-Support Release (ESR)','Old','Latest Release Date','Release History','History','Info','Current'
             $empty_line | Out-String
             $header_firefox_enumeration = "Latest Firefox Versions"
             $coline_firefox_enumeration = "-----------------------"
             Write-Output $header_firefox_enumeration
             $coline_firefox_enumeration | Out-String
-            Write-Output $obj_firefox_latest_selection
+            Write-Output $latest_firefox_selection
         } Else {
             $continue = $true
-        } # else
+        } # Else
 
 
 
@@ -433,9 +509,9 @@ If ($firefox_is_installed -eq $true) {
     $most_recent_firefox_already_exists = Check-InstalledSoftware "Mozilla Firefox $($most_recent_firefox_version)*"
     $most_recent_32_bit_firefox_already_exists = Check-InstalledSoftware "Mozilla Firefox $($most_recent_firefox_version) (x86*"
     $most_recent_64_bit_firefox_already_exists = Check-InstalledSoftware "Mozilla Firefox $($most_recent_firefox_version) (x64*"
-    $all_32_bit_firefoxes = $obj_firefox_enumeration | Where-Object { $_.Type -eq "32-bit" }
+    $all_32_bit_firefoxes = $firefox_enumeration | Where-Object { $_.Type -eq "32-bit" }
     $number_of_32_bit_firefoxes = ($all_32_bit_firefoxes | Measure-Object).Count
-    $all_64_bit_firefoxes = $obj_firefox_enumeration | Where-Object { $_.Type -eq "64-bit" }
+    $all_64_bit_firefoxes = $firefox_enumeration | Where-Object { $_.Type -eq "64-bit" }
     $number_of_64_bit_firefoxes = ($all_64_bit_firefoxes | Measure-Object).Count
 
 
@@ -451,19 +527,35 @@ If ($firefox_is_installed -eq $true) {
                             $language.Get_Item(($most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
                         } Else {
                             $language | Select-Object -ExpandProperty (($most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
-                        } # else
+                        } # Else
 
                     } Else {
                         $continue = $true
-                    } # else ($locale)
+                    } # Else ($locale)
 
         If ($powershell_v2_or_earlier -eq $true) {
-            $release_date = $history.Get_Item($most_recent_32_bit_firefox_already_exists.DisplayVersion)
+            try
+            {
+                $release_date = $all_dates.Get_Item($most_recent_32_bit_firefox_already_exists.DisplayVersion)
+            }
+            catch
+            {
+                $message = $error[0].Exception
+                Write-Verbose $message
+            }
         } Else {
-            $release_date = $history | Select-Object -ExpandProperty $most_recent_32_bit_firefox_already_exists.DisplayVersion
-        } # else
+            try
+            {
+                $release_date = $all_dates | Select-Object -ExpandProperty $most_recent_32_bit_firefox_already_exists.DisplayVersion
+            }
+            catch
+            {
+                $message = $error[0].Exception
+                Write-Verbose $message
+            }
+        } # Else
 
-                            $obj_32_installed_current += New-Object -TypeName PSCustomObject -Property @{
+                            $currently_installed_32 += New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $most_recent_32_bit_firefox_already_exists.DisplayName.replace("(TM)","")
                                 'Publisher'                     = $most_recent_32_bit_firefox_already_exists.Publisher
                                 'Product'                       = $most_recent_32_bit_firefox_already_exists.DisplayName.Split(" ")[1]
@@ -478,10 +570,10 @@ If ($firefox_is_installed -eq $true) {
                                 'Version'                       = $most_recent_32_bit_firefox_already_exists.DisplayVersion
 
                             } # New-Object
-                        $obj_32_installed_current.PSObject.TypeNames.Insert(0,"Existing Current Firefox 32-bit")
+                        $currently_installed_32.PSObject.TypeNames.Insert(0,"Existing Current Firefox 32-bit")
 
         $empty_line | Out-String
-        Write-Output "Currently (until the next Firefox version is released) the $($($obj_32_installed_current.Locale).English) 32-bit $($obj_32_installed_current.Name) released on $((Get-Date ($obj_32_installed_current.Release_Date)).ToShortDateString()) doesn't need any further maintenance or care."
+        Write-Output "Currently (until the next Firefox version is released) the $($($currently_installed_32.Locale).English) 32-bit $($currently_installed_32.Name) released on $((Get-Date ($currently_installed_32.Release_Date)).ToShortDateString()) doesn't need any further maintenance or care."
 
     } Else {
         $downloading_firefox_32_is_required = $true
@@ -492,10 +584,26 @@ If ($firefox_is_installed -eq $true) {
             If ($32_bit_firefox.Version -eq $most_recent_firefox_version) {
 
                         If ($powershell_v2_or_earlier -eq $true) {
-                            $release_date = $history.Get_Item($32_bit_firefox.Version)
+                            try
+                            {
+                                $release_date = $all_dates.Get_Item($32_bit_firefox.Version)
+                            }
+                            catch
+                            {
+                                $message = $error[0].Exception
+                                Write-Verbose $message
+                            }
                         } Else {
-                            $release_date_32 = $history | Select-Object -ExpandProperty "$($32_bit_firefox.Version)"
-                        } # else
+                            try
+                            {
+                                $release_date_32 = $all_dates | Select-Object -ExpandProperty "$($32_bit_firefox.Version)"
+                            }
+                            catch
+                            {
+                                $message = $error[0].Exception
+                                Write-Verbose $message
+                            }
+                        } # Else
 
                 $empty_line | Out-String
                 Write-Output "Currently (until the next Firefox version is released) the 32-bit $($32_bit_firefox.Name) released on $((Get-Date ($release_date_32)).ToShortDateString()) doesn't need any further maintenance or care."
@@ -504,11 +612,11 @@ If ($firefox_is_installed -eq $true) {
                 Write-Warning "$($32_bit_firefox.Name) seems to be outdated."
                 $empty_line | Out-String
                 Write-Output "The most recent non-beta Firefox version is $most_recent_firefox_version. The installed 32-bit Firefox version $($32_bit_firefox.Version) needs to be updated."
-            } # else
+            } # Else
 
 
         } # ForEach
-    } # else
+    } # Else
 
 
     # 64-bit
@@ -523,19 +631,35 @@ If ($firefox_is_installed -eq $true) {
                             $language.Get_Item(($most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
                         } Else {
                             $language | Select-Object -ExpandProperty (($most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[-1]).Replace(")",""))
-                        } # else
+                        } # Else
 
                     } Else {
                         $continue = $true
-                    } # else ($locale)
+                    } # Else ($locale)
 
         If ($powershell_v2_or_earlier -eq $true) {
-            $release_date = $history.Get_Item($most_recent_64_bit_firefox_already_exists.DisplayVersion)
+            try
+            {
+                $release_date = $all_dates.Get_Item($most_recent_64_bit_firefox_already_exists.DisplayVersion)
+            }
+            catch
+            {
+                $message = $error[0].Exception
+                Write-Verbose $message
+            }
         } Else {
-            $release_date = $history | Select-Object -ExpandProperty $most_recent_64_bit_firefox_already_exists.DisplayVersion
-        } # else
+            try
+            {
+                $release_date = $all_dates | Select-Object -ExpandProperty $most_recent_64_bit_firefox_already_exists.DisplayVersion
+            }
+            catch
+            {
+                $message = $error[0].Exception
+                Write-Verbose $message
+            }
+        } # Else
 
-                            $obj_64_installed_current += New-Object -TypeName PSCustomObject -Property @{
+                            $currently_installed_64 += New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $most_recent_64_bit_firefox_already_exists.DisplayName.replace("(TM)","")
                                 'Publisher'                     = $most_recent_64_bit_firefox_already_exists.Publisher
                                 'Product'                       = $most_recent_64_bit_firefox_already_exists.DisplayName.Split(" ")[1]
@@ -550,10 +674,10 @@ If ($firefox_is_installed -eq $true) {
                                 'Version'                       = $most_recent_64_bit_firefox_already_exists.DisplayVersion
 
                             } # New-Object
-                        $obj_64_installed_current.PSObject.TypeNames.Insert(0,"Existing Current Firefox 64-bit")
+                        $currently_installed_64.PSObject.TypeNames.Insert(0,"Existing Current Firefox 64-bit")
 
         $empty_line | Out-String
-        Write-Output "Currently (until the next Firefox version is released) the $($($obj_64_installed_current.Locale).English) 64-bit $($obj_64_installed_current.Name) released on $((Get-Date ($obj_64_installed_current.Release_Date)).ToShortDateString()) doesn't need any further maintenance or care."
+        Write-Output "Currently (until the next Firefox version is released) the $($($currently_installed_64.Locale).English) 64-bit $($currently_installed_64.Name) released on $((Get-Date ($currently_installed_64.Release_Date)).ToShortDateString()) doesn't need any further maintenance or care."
 
     } Else {
         $downloading_firefox_64_is_required = $true
@@ -564,10 +688,26 @@ If ($firefox_is_installed -eq $true) {
             If ($64_bit_firefox.Version -eq $most_recent_firefox_version) {
 
                         If ($powershell_v2_or_earlier -eq $true) {
-                            $release_date_64 = $history.Get_Item($64_bit_firefox.Version)
+                            try
+                            {
+                                $release_date_64 = $all_dates.Get_Item($64_bit_firefox.Version)
+                            }
+                            catch
+                            {
+                                $message = $error[0].Exception
+                                Write-Verbose $message
+                            }
                         } Else {
-                            $release_date_64 = $history | Select-Object -ExpandProperty "$($64_bit_firefox.Version)"
-                        } # else
+                            try
+                            {
+                                $release_date_64 = $all_dates | Select-Object -ExpandProperty "$($64_bit_firefox.Version)"
+                            }
+                            catch
+                            {
+                                $message = $error[0].Exception
+                                Write-Verbose $message
+                            }
+                        } # Else
 
                 $empty_line | Out-String
                 Write-Output "Currently (until the next Firefox version is released) the 64-bit $($64_bit_firefox.Name) released on $((Get-Date ($release_date_64)).ToShortDateString()) doesn't need any further maintenance or care."
@@ -576,14 +716,14 @@ If ($firefox_is_installed -eq $true) {
                 Write-Warning "$($64_bit_firefox.Name) seems to be outdated."
                 $empty_line | Out-String
                 Write-Output "The most recent non-beta Firefox version is $most_recent_firefox_version. The installed 64-bit Firefox version $($64_bit_firefox.Version) needs to be updated."
-            } # else
+            } # Else
 
         } # ForEach
-    } # else
+    } # Else
 
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -596,9 +736,9 @@ If ($firefox_is_installed -eq $true) {
     $64_bit_uninstall_string = $all_64_bit_firefoxes | Select-Object -ExpandProperty 'Standard Uninstall String'
 
                 $obj_maintenance += New-Object -TypeName PSCustomObject -Property @{
-                    'Open the Firefox primary profile location'     = [string]'Invoke-Item ' + [Environment]::GetFolderPath("ApplicationData") + '\Mozilla\Firefox\Profiles'
-                    'Open the Firefox secondary profile location'   = [string]'Invoke-Item ' + [Environment]::GetFolderPath("LocalApplicationData") + '\Mozilla\Firefox\Profiles'
-                    'Open the updates.xml file location'            = [string]'Invoke-Item ' + [Environment]::GetFolderPath("LocalApplicationData") + '\Mozilla\updates\'
+                    'Open the Firefox primary profile location'     = [string]'Invoke-Item ' + $quote + [Environment]::GetFolderPath("ApplicationData") + '\Mozilla\Firefox\Profiles' + $unquote
+                    'Open the Firefox secondary profile location'   = [string]'Invoke-Item ' + $quote + [Environment]::GetFolderPath("LocalApplicationData") + '\Mozilla\Firefox\Profiles' + $unquote
+                    'Open the updates.xml file location'            = [string]'Invoke-Item ' + $quote + [Environment]::GetFolderPath("LocalApplicationData") + '\Mozilla\updates\' + $unquote
                     'Uninstall the 32-bit Firefox'                  = If ($32_bit_firefox_is_installed -eq $true) { $32_bit_uninstall_string } Else { [string]'[not installed]' }
                     'Uninstall the 64-bit Firefox'                  = If ($64_bit_firefox_is_installed -eq $true) { $64_bit_uninstall_string } Else { [string]'[not installed]' }
 
@@ -637,7 +777,7 @@ If ($firefox_is_installed -eq $true) {
 
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -650,7 +790,7 @@ If ($firefox_is_installed -eq $true) {
         Return "The installed Firefox seems to be OK."
     } Else {
         $continue = $true
-    } # else
+    } # Else
 } Else {
     Write-Warning "No Firefox seems to be installed on the system."
     $empty_line | Out-String
@@ -733,6 +873,7 @@ If ($firefox_is_installed -eq $true) {
                     $downloading_firefox_is_required = $true
                     $downloading_firefox_32_is_required = $true
                     $os = '&os=win'
+                    $bit_number = "32"
                     $continue = $true
                     }
                     1 {
@@ -743,6 +884,7 @@ If ($firefox_is_installed -eq $true) {
                     $downloading_firefox_is_required = $true
                     $downloading_firefox_64_is_required = $true
                     $os = '&os=win64'
+                    $bit_number = "64"
                     $continue = $true
                     }
                     2 {
@@ -988,8 +1130,8 @@ If ($firefox_is_installed -eq $true) {
 
     } Else {
         Exit
-    } # else (Admin Corner)
-} # else (No Firefox )
+    } # Else (Admin Corner)
+} # Else (No Firefox )
 
 
 
@@ -1008,7 +1150,7 @@ If (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::
     Return "Exiting without updating (at Step 12)."
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -1042,7 +1184,7 @@ Write-Progress -Id $id -Activity $activity -Status $status -CurrentOperation $ta
         Write-Host " ...Stopping the Firefox Update Protocol..."; Break;
     } Else {
         $continue = $true
-    } # else
+    } # Else
 
 
 
@@ -1275,19 +1417,21 @@ If (($multiple_firefoxes -ne $true) -and ($admin_corner -ne $true)) {
 
             If ($downloading_firefox_32_is_required -eq $true) {
                 $os = '&os=win'
+                $bit_number = "32"
             } ElseIf ($downloading_firefox_64_is_required -eq $true) {
                 $os = '&os=win64'
+                $bit_number = "64"
             } Else {
                 $continue = $true
-            } # else
+            } # Else
 
 
             # $system_language_and_region = (Get-Culture).Name
             # $system_language_abbreviation = (Get-Culture).TwoLetterISOLanguageName
             # $system_language = (Get-Culture).EnglishName
-            If ($obj_firefox_enumeration.Locale -ne $null) {
-                $lang = [string]'&lang=' + $obj_firefox_enumeration.Locale
-            } ElseIf ($obj_firefox_enumeration.Locale -eq $null) {
+            If ($firefox_enumeration.Locale -ne $null) {
+                $lang = [string]'&lang=' + $firefox_enumeration.Locale
+            } ElseIf ($firefox_enumeration.Locale -eq $null) {
 
                     If ((($language | Select-Object -ErrorAction SilentlyContinue -ExpandProperty "$($(Get-Culture).TwoLetterISOLanguageName)").English) -match ((Get-Culture).EnglishName.split(' (')[0]) ) {
                         $lang = [string]'&lang=' + $($(Get-Culture).TwoLetterISOLanguageName)
@@ -1299,11 +1443,11 @@ If (($multiple_firefoxes -ne $true) -and ($admin_corner -ne $true)) {
                         $lang = [string]'&lang=' + $($(Get-Culture).TwoLetterISOLanguageName)
                     } Else {
                        $lang = [string]'&lang=' + (([Threading.Thread]::CurrentThread.CurrentUICulture).Name.Split("-")[0])
-                     } # else
+                     } # Else
 
             } Else {
                 $continue = $true
-            } # else
+            } # Else
 
 
     $download_url = [string]'https://download.mozilla.org/?product=firefox-latest' + $os + $lang
@@ -1313,7 +1457,7 @@ If (($multiple_firefoxes -ne $true) -and ($admin_corner -ne $true)) {
     $continue = $true
 } Else {
     Return "Multiple Firefox installations detected. Please update the relevant Firefox versions manually by visiting for example https://www.mozilla.org/en-US/firefox/all/ or run this script again after reducing the total number of Firefox installations to one. Exiting without updating (at Step 15)."
-} # else (If $multiple_firefoxes)
+} # Else (If $multiple_firefoxes)
 
 
 
@@ -1323,7 +1467,7 @@ If (($multiple_firefoxes -ne $true) -and ($admin_corner -ne $true)) {
 If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq $true)) {
 
     $task_number = 4
-    $task = "Downloading a full offline Firefox installer ($download_url)"
+    $task = "Downloading a full offline $bit_number-bit Firefox installer from $download_url"
     Write-Progress -Id $id -Activity $activity -Status $status -CurrentOperation $task -PercentComplete (($task_number / $total_steps) * 100)
 
 
@@ -1337,7 +1481,7 @@ If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq
         Remove-Item -Path "$firefox_save_location"
     } Else {
         $continue = $true
-    } # else
+    } # Else
 
             try
             {
@@ -1357,11 +1501,11 @@ If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq
         $firefox_is_downloaded = $true
     } Else {
         $firefox_is_downloaded = $false
-    } # else
+    } # Else
 
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -1414,12 +1558,12 @@ If ($firefox_is_downloaded -eq $true) {
     Write-Progress -Id $id -Activity $activity -Status $status -CurrentOperation $task -PercentComplete (($task_number / $total_steps) * 100)
 
     cd $path
-    .\Firefox_Setup.exe /INI=$path\$ini_file | Out-Null
+    .\Firefox_Setup.exe /INI="$path\$ini_file" | Out-Null
     cd $script_path
     Start-Sleep -s 5
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -1437,7 +1581,7 @@ If ((Check-InstalledSoftware "*Firefox*") -ne $null) {
     $firefox_is_installed = $true
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 # Enumerate the installed Firefoxes after the update
@@ -1454,7 +1598,7 @@ If ($registry_paths_after_update -ne $null) {
             $locale_new = ($new_firefox.DisplayName.Split(" ")[-1]).Replace(")","")
         } Else {
             $continue = $true
-        } # else
+        } # Else
 
 
         If (($new_firefox.DisplayName.Split(" ")[-1] -match "\(x") -eq $true) {
@@ -1467,7 +1611,7 @@ If ($registry_paths_after_update -ne $null) {
                 $type_new = "64-bit"
             } Else {
                 $continue = $true
-            } # else
+            } # Else
 
         } ElseIf (($new_firefox.DisplayName.Split(" ")[-2] -match "\(x") -eq $true) {
 
@@ -1479,18 +1623,21 @@ If ($registry_paths_after_update -ne $null) {
                 $type_new = "64-bit"
             } Else {
                 $continue = $true
-            } # else
+            } # Else
 
         } Else {
             $continue = $true
-        } # else
+        } # Else
 
 
         $product_version_new = ((Get-ItemProperty -Path "$($new_firefox.InstallLocation)\Firefox.exe" -ErrorAction SilentlyContinue -Name VersionInfo).VersionInfo).ProductVersion
-        $regex_build_new = If ($product_version_new -ne $null) { $product_version_new -match "(?<B1>\d+)\.(?<B2>\d+)\.(?<B3>\d+)" } Else { $continue = $true }
+        $regex_stability = $product_version_new -match "(\d+)\.(\d+)\.(\d+)"
+        $regex_major = $product_version_new -match "(\d+)\.(\d+)"  
+        If (($product_version_new -ne $null) -and ($regex_stability -eq $true)) { $product_version_new -match "(?<B1>\d+)\.(?<B2>\d+)\.(?<B3>\d+)" } Else { $continue = $true }
+        If (($product_version_new -ne $null) -and ($regex_stability -eq $false) -and ($regex_major -eq $true))  { $product_version_new -match "(?<B1>\d+)\.(?<B2>\d+)" } Else { $continue = $true }
 
 
-                            $obj_firefox_after_update += New-Object -TypeName PSCustomObject -Property @{
+                            $after_update_firefoxes += $obj_updated_firefox = New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $new_firefox.DisplayName.Replace("(TM)","")
                                 'Publisher'                     = $new_firefox.Publisher
                                 'Product'                       = $new_firefox.DisplayName.Split(" ")[1]
@@ -1498,7 +1645,7 @@ If ($registry_paths_after_update -ne $null) {
                                 'Locale'                        = $locale_new
                                 'Major Version'                 = If ($Matches.B1 -ne $null) { $Matches.B1 } Else { $continue = $true }
                                 'Minor Version'                 = If ($Matches.B2 -ne $null) { $Matches.B2 } Else { $continue = $true }
-                                'Build Number'                  = If ($Matches.B3 -ne $null) { $Matches.B3 } Else { $continue = $true }
+                                'Build Number'                  = If ($Matches.B3 -ne $null) { $Matches.B3 } Else { "-" }
                                 'Computer'                      = $computer
                                 'Install Location'              = $new_firefox.InstallLocation
                                 'Standard Uninstall String'     = $new_firefox.UninstallString.Trim('"')
@@ -1506,27 +1653,26 @@ If ($registry_paths_after_update -ne $null) {
                                 'Identifying Number'            = $new_firefox.PSChildName
                                 'Version'                       = $new_firefox.DisplayVersion
                             } # New-Object
-                        $obj_firefox_after_update.PSObject.TypeNames.Insert(0,"Firefox Versions After the Update")
-
     } # foreach ($new_firefox)
 
 
         # Display the Firefox Version Enumeration in console
-        If ($obj_firefox_after_update -ne $null) {
-            $obj_firefox_after_update_selection = $obj_firefox_after_update | Select-Object 'Name','Publisher','Product','Type','Locale','Major Version','Minor Version','Build Number','Computer','Install Location','Standard Uninstall String','Release Notes','Version'
+        If ($after_update_firefoxes -ne $null) {
+            $after_update_firefoxes.PSObject.TypeNames.Insert(0,"Firefox Versions After the Update")
+            $after_update_firefoxes_selection = $after_update_firefoxes | Select-Object 'Name','Publisher','Product','Type','Locale','Major Version','Minor Version','Build Number','Computer','Install Location','Standard Uninstall String','Release Notes','Version'
             $empty_line | Out-String
             $header_new = "Firefox Versions Found on the System After the Update"
             $coline_new = "-----------------------------------------------------"
             Write-Output $header_new
             $coline_new | Out-String
-            Write-Output $obj_firefox_after_update_selection
+            Write-Output $after_update_firefoxes_selection
         } Else {
             $continue = $true
-        } # else
+        } # Else
 
 } Else {
     $continue = $true
-} # else (Step 19)
+} # Else (Step 19)
 
 
 
@@ -1539,36 +1685,36 @@ Write-Progress -Id $id -Activity $activity -Status $status -CurrentOperation $ta
 
 
 $multiple_firefoxes_after_update = $false
-If ((($obj_firefox_after_update | Measure-Object Name).Count) -eq 0) {
+If ((($after_update_firefoxes | Measure-Object Name).Count) -eq 0) {
     $success = $false
     $empty_line | Out-String
     Write-Warning "No Firefox seems to be installed on the system."
     $empty_line | Out-String
     Return "The most recent non-beta Firefox version is $most_recent_firefox_version. This script tried to update Firefox, but something went wrong with the installation. Instead of updating Firefox this script uninstalled all versions of Firefox. Exiting at Step 20."
-} ElseIf ((($obj_firefox_after_update | Measure-Object Name).Count) -eq 1) {
+} ElseIf ((($after_update_firefoxes | Measure-Object Name).Count) -eq 1) {
     # One instance of Firefox seems to be installed.
     $continue = $true
-} ElseIf ((($obj_firefox_after_update | Measure-Object Name).Count) -ge 2) {
+} ElseIf ((($after_update_firefoxes | Measure-Object Name).Count) -ge 2) {
     $success = $false
     $empty_line | Out-String
     Write-Warning "More than one instance of Firefox seems to be installed on the system."
     $multiple_firefoxes_after_update = $true
     $empty_line | Out-String
-    Return "The most recent non-beta Firefox version is $most_recent_firefox_version. This script tried to update Firefox, but something went wrong with the installation. Instead of updating Firefox this script installed yet another version of Firefox. Currently the versions $($obj_firefox_after_update.Version) are installed. Exiting at Step 20."
+    Return "The most recent non-beta Firefox version is $most_recent_firefox_version. This script tried to update Firefox, but something went wrong with the installation. Instead of updating Firefox this script installed yet another version of Firefox. Currently the versions $($after_update_firefoxes.Version) are installed. Exiting at Step 20."
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 $most_recent_firefox_after_update = Check-InstalledSoftware "Mozilla Firefox $($most_recent_firefox_version)*"
-If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq $true) -and ($obj_firefox_after_update -ne $null) -and ($multiple_firefoxes_after_update -eq $false)) {
+If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq $true) -and ($after_update_firefoxes -ne $null) -and ($multiple_firefoxes_after_update -eq $false)) {
 
     If ($most_recent_firefox_after_update -eq $null) {
         $success = $false
         $empty_line | Out-String
         Write-Warning "Failed to update Mozilla Firefox"
         $empty_line | Out-String
-        Return "$($obj_firefox_after_update.Name) seems to be outdated. The most recent non-beta Firefox version is $most_recent_firefox_version. The installed Firefox version $($obj_firefox_after_update.Version) needs to be updated. This script tried to update Firefox, but failed to do so."
+        Return "$($after_update_firefoxes.Name) seems to be outdated. The most recent non-beta Firefox version is $most_recent_firefox_version. The installed Firefox version $($after_update_firefoxes.Version) needs to be updated. This script tried to update Firefox, but failed to do so."
 
     } ElseIf ($most_recent_firefox_after_update) {
 
@@ -1578,23 +1724,39 @@ If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq
                             $language.Get_Item(($most_recent_firefox_after_update.DisplayName.Split(" ")[-1]).Replace(")",""))
                         } Else {
                             $language | Select-Object -ExpandProperty (($most_recent_firefox_after_update.DisplayName.Split(" ")[-1]).Replace(")",""))
-                        } # else
+                        } # Else
 
                     } Else {
                         $continue = $true
-                    } # else ($locale)
+                    } # Else ($locale)
 
         If ($powershell_v2_or_earlier -eq $true) {
-            $release_date = $history.Get_Item($most_recent_firefox_after_update.DisplayVersion)
+            try
+            {
+                $release_date = $all_dates.Get_Item($most_recent_firefox_after_update.DisplayVersion)
+            }
+            catch
+            {
+                $message = $error[0].Exception
+                Write-Verbose $message
+            }
         } Else {
-            $release_date = $history | Select-Object -ExpandProperty $most_recent_firefox_after_update.DisplayVersion
-        } # else
+            try
+            {
+                $release_date = $all_dates | Select-Object -ExpandProperty $most_recent_firefox_after_update.DisplayVersion
+            }
+            catch
+            {
+                $message = $error[0].Exception
+                Write-Verbose $message
+            }
+       } # Else
 
                             $obj_success_firefox += New-Object -TypeName PSCustomObject -Property @{
                                 'Name'                          = $most_recent_firefox_after_update.DisplayName.replace("(TM)","")
                                 'Publisher'                     = $most_recent_firefox_after_update.Publisher
                                 'Product'                       = $most_recent_firefox_after_update.DisplayName.Split(" ")[1]
-                                'Type'                          = $obj_firefox_after_update.Type
+                                'Type'                          = $after_update_firefoxes.Type
                                 'Locale'                        = $locale
                                 'Computer'                      = $computer
                                 'Install_Location'              = $most_recent_firefox_after_update.InstallLocation
@@ -1614,11 +1776,11 @@ If (($firefox_is_installed -eq $true) -and ($downloading_firefox_is_required -eq
 
     } Else {
         $continue = $true
-    } # else
+    } # Else
 
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -1634,7 +1796,7 @@ If ($obj_success_firefox -ne $null) {
     Start-Process -FilePath "$($obj_success_firefox.Install_Location)\firefox.exe" -ArgumentList "https://www.mozilla.org/en-US/firefox/new/"
 } Else {
     $continue = $true
-} # else
+} # Else
 
 
 
@@ -1668,7 +1830,7 @@ $runtime = ($end_time) - ($start_time)
         $runtime_result = [string]$runtime.Milliseconds + ' milliseconds'
     } Else {
         $runtime_result = [string]''
-    } # else (if)
+    } # Else (if)
 
         If ($runtime_result.Contains(" 0 h")) {
             $runtime_result = $runtime_result.Replace(" 0 h"," ")
@@ -1749,11 +1911,11 @@ elevated or not).
 
 Update-MozillaFirefox tries to write several Firefox-related files, namely
 "firefox_current_versions.json", "firefox_release_history.json",
-"firefox_languages.json" and "firefox_regions.json" at Step 7. If the script
-has advanced to the updating phase, at Step 14 an Install Configuration File
-(firefox_configuration.ini) is also written to $path, where, for instance, the
-automatic Mozilla Maintenance service is disabled and the default shortcuts are
-enabled.
+"firefox_major_versions.json", "firefox_languages.json" and "firefox_regions.json" 
+at Step 7. If the script has advanced to the updating phase, at Step 14 an Install
+Configuration File (firefox_configuration.ini) is also written to $path, where, 
+for instance, the automatic Mozilla Maintenance service is disabled and the default
+shortcuts are enabled.
 
 If Update-MozillaFirefox is run without elevated rights (but with a working
 Internet connection) in a machine with an old Firefox version, it will be shown
@@ -1816,7 +1978,7 @@ https://wiki.mozilla.org/Installer:Command_Line_Arguments
 
 
 At Step 7 the baseline Firefox version numbers are written to a file
-(firefox_current_versions.json) and also three additional auxillary JSON files
+(firefox_current_versions.json) and also four additional auxillary JSON files
 are created, namely:
 
 
@@ -1825,6 +1987,7 @@ are created, namely:
 
         firefox_current_versions.json       %TEMP%\firefox_current_versions.json
         firefox_release_history.json        %TEMP%\firefox_release_history.json
+        firefox_major_versions.json         %TEMP%\firefox_major_versions.json
         firefox_languages.json              %TEMP%\firefox_languages.json
         firefox_regions.json                %TEMP%\firefox_regions.json
 
@@ -1889,53 +2052,105 @@ http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-locatio
 
     Homepage:           https://github.com/auberginehill/update-mozilla-firefox
     Short URL:          http://tinyurl.com/gr75tjx
-    Version:            1.2
+    Version:            1.3
 
 .EXAMPLE
 ./Update-MozillaFirefox
-Run the script. Please notice to insert ./ or .\ before the script name.
+Runs the script. Please notice to insert ./ or .\ before the script name.
 
 .EXAMPLE
 help ./Update-MozillaFirefox -Full
-Display the help file.
+Displays the help file.
 
 .EXAMPLE
-Set-ExecutionPolicy remotesigned
-This command is altering the Windows PowerShell rights to enable script execution. Windows PowerShell
-has to be run with elevated rights (run as an administrator) to actually be able to change the script
-execution properties. The default value is "Set-ExecutionPolicy restricted".
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+This command is altering the Windows PowerShell rights to enable script execution
+in the default (LocalMachine) scope, and defines the conditions under which Windows
+PowerShell loads configuration files and runs scripts in general. In Windows Vista
+and later versions of Windows, for running commands that change the execution policy
+of the LocalMachine scope, Windows PowerShell has to be run with elevated rights
+(Run as Administrator). The default policy of the default (LocalMachine) scope is
+"Restricted", and a command "Set-ExecutionPolicy Restricted" will "undo" the changes
+made with the original example above (had the policy not been changed before...).
+Execution policies for the local computer (LocalMachine) and for the current user
+(CurrentUser) are stored in the registry (at for instance the
+HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ExecutionPolicy key), and remain
+effective until they are changed again. The execution policy for a particular session
+(Process) is stored only in memory, and is discarded when the session is closed.
 
 
     Parameters:
 
-    Restricted      Does not load configuration files or run scripts. Restricted is the default
-                    execution policy.
+    Restricted      Does not load configuration files or run scripts, but permits
+                    individual commands. Restricted is the default execution policy.
 
-    AllSigned       Requires that all scripts and configuration files be signed by a trusted
-                    publisher, including scripts that you write on the local computer.
+    AllSigned       Scripts can run. Requires that all scripts and configuration
+                    files be signed by a trusted publisher, including the scripts
+                    that have been written on the local computer. Risks running
+                    signed, but malicious, scripts.
 
-    RemoteSigned    Requires that all scripts and configuration files downloaded from the Internet
-                    be signed by a trusted publisher.
+    RemoteSigned    Requires a digital signature from a trusted publisher on scripts
+                    and configuration files that are downloaded from the Internet
+                    (including e-mail and instant messaging programs). Does not
+                    require digital signatures on scripts that have been written on
+                    the local computer. Permits running unsigned scripts that are
+                    downloaded from the Internet, if the scripts are unblocked by
+                    using the Unblock-File cmdlet. Risks running unsigned scripts
+                    from sources other than the Internet and signed, but malicious,
+                    scripts.
 
-    Unrestricted    Loads all configuration files and runs all scripts. If you run an unsigned
-                    script that was downloaded from the Internet, you are prompted for permission
-                    before it runs.
+    Unrestricted    Loads all configuration files and runs all scripts.
+                    Warns the user before running scripts and configuration files
+                    that are downloaded from the Internet. Not only risks, but
+                    actually permits, eventually, running any unsigned scripts from
+                    any source. Risks running malicious scripts.
 
     Bypass          Nothing is blocked and there are no warnings or prompts.
+                    Not only risks, but actually permits running any unsigned scripts
+                    from any source. Risks running malicious scripts.
 
-    Undefined       Removes the currently assigned execution policy from the current scope.
-                    This parameter will not remove an execution policy that is set in a Group
-                    Policy scope.
+    Undefined       Removes the currently assigned execution policy from the current
+                    scope. If the execution policy in all scopes is set to Undefined,
+                    the effective execution policy is Restricted, which is the
+                    default execution policy. This parameter will not alter or
+                    remove the ("master") execution policy that is set with a Group
+                    Policy setting.
+    __________
+    Notes: 	      - Please note that the Group Policy setting "Turn on Script Execution"
+                    overrides the execution policies set in Windows PowerShell in all
+                    scopes. To find this ("master") setting, please, for example, open
+                    the Local Group Policy Editor (gpedit.msc) and navigate to
+                    Computer Configuration > Administrative Templates >
+                    Windows Components > Windows PowerShell.
+
+                  - The Local Group Policy Editor (gpedit.msc) is not available in any
+                    Home or Starter edition of Windows.
+
+                  - Group Policy setting "Turn on Script Execution":
+
+               	    Not configured                                          : No effect, the default
+                                                                               value of this setting
+                    Disabled                                                : Restricted
+                    Enabled - Allow only signed scripts                     : AllSigned
+                    Enabled - Allow local scripts and remote signed scripts : RemoteSigned
+                    Enabled - Allow all scripts                             : Unrestricted
 
 
-For more information, please type "Get-ExecutionPolicy -List" or "help Set-ExecutionPolicy -Full"
-or visit https://technet.microsoft.com/en-us/library/hh849812.aspx.
+For more information, please type "Get-ExecutionPolicy -List", "help Set-ExecutionPolicy -Full",
+"help about_Execution_Policies" or visit https://technet.microsoft.com/en-us/library/hh849812.aspx
+or http://go.microsoft.com/fwlink/?LinkID=135170.
 
 .EXAMPLE
 New-Item -ItemType File -Path C:\Temp\Update-MozillaFirefox.ps1
-Creates an empty ps1-file to the C:\Temp directory. The New-Item cmdlet has an inherent -NoClobber mode
-built into it, so that the procedure will halt, if overwriting (replacing the contents) of an existing
-file is about to happen. Overwriting a file with the New-Item cmdlet requires using the Force.
+Creates an empty ps1-file to the C:\Temp directory. The New-Item cmdlet has an inherent
+-NoClobber mode built into it, so that the procedure will halt, if overwriting (replacing
+the contents) of an existing file is about to happen. Overwriting a file with the New-Item
+cmdlet requires using the Force. If the path name and/or the filename includes space
+characters, please enclose the whole -Path parameter value in quotation marks (single or
+double):
+
+    New-Item -ItemType File -Path "C:\Folder Name\Update-MozillaFirefox.ps1"
+
 For more information, please type "help New-Item -Full".
 
 .LINK
@@ -1948,6 +2163,7 @@ http://stackoverflow.com/questions/5466329/whats-the-best-way-to-determine-the-l
 http://stackoverflow.com/questions/10941756/powershell-show-elapsed-time
 http://stackoverflow.com/questions/1825585/determine-installed-powershell-version?rq=1
 https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-json
+https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-stringdata
 https://blogs.technet.microsoft.com/heyscriptingguy/2014/04/23/powertip-convert-json-file-to-powershell-object/
 http://stackoverflow.com/questions/32887583/powershell-v2-converts-dictionary-to-array-when-returned-from-a-function
 http://powershelldistrict.com/powershell-json/
