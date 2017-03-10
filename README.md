@@ -18,86 +18,80 @@
 ## Update-MozillaFirefox.ps1
 
 <table>
-   <tr>
-      <td style="padding:6px"><strong>OS:</strong></td>
-      <td style="padding:6px">Windows</td>
-   </tr>
-   <tr>
-      <td style="padding:6px"><strong>Type:</strong></td>
-      <td style="padding:6px">A Windows PowerShell script</td>
-   </tr>
-   <tr>
-      <td style="padding:6px"><strong>Language:</strong></td>
-      <td style="padding:6px">Windows PowerShell</td>
-   </tr>
-   <tr>
-      <td style="padding:6px"><strong>Description:</strong></td>
-      <td style="padding:6px">Update-MozillaFirefox downloads a list of the most recent Firefox version numbers against which it compares the Firefox version numbers found on the system and displays, whether a Firefox update is needed or not. The actual update process naturally requires elevated rights and a working Internet connection. Update-MozillaFirefox detects the installed Firefox(es) by querying the Windows registry for installed programs. The keys from <code>HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\</code> and <code>HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\</code> are read on 64-bit computers and on the 32-bit computers only the latter path is accessed. When run in a 'normal' PowerShell window, when all the detected Firefox versions are up-to-date, Update-MozillaFirefox will just check that everything is OK and leave without further ceremony at Step 11 (before trying to determine, whether it is run elevated or not).
-      <br />
-      <br />Update-MozillaFirefox tries to write several Firefox-related files, namely "<code>firefox_current_versions.json</code>", "<code>firefox_release_history.json</code>", "<code>firefox_languages.json</code>" and "<code>firefox_regions.json</code>" at Step 7. If the script has advanced to the updating phase, at Step 14 an Install Configuration File (<code>firefox_configuration.ini</code>) is also written to <code>$path</code>, where, for instance, the automatic Mozilla Maintenance service is disabled and the default shortcuts are enabled.
-      <br />
-      <br />If Update-MozillaFirefox is run without elevated rights (but with a working Internet connection) in a machine with an old Firefox version, it will be shown that a Firefox update is needed, but Update-MozillaFirefox will exit at Step 12 before downloading any files. To perform an update with Update-MozillaFirefox, PowerShell has to be run in an elevated window (run as an administrator).
-      <br />
-      <br />If Update-MozillaFirefox is run in an elevated PowerShell window and no Firefox is detected, the script offers the option to install Firefox in the "<strong>Admin Corner</strong>" (step 11), where, in contrary to the main autonomous nature of Update-MozillaFirefox, an end-user input is required for selecting the bit-version and the language. In the "Admin Corner", one instance of either 32-bit or 64-bit version in the selected language is installable with Update-MozillaFirefox – the language selection covers over 30 languages.
-      <br />
-      <br />In the update procedure itself Update-MozillaFirefox downloads a full Firefox installer from Mozilla, which is equal to the type that is already installed on the system (same bit version and language). After writing the Install Configuration File (<code>firefox_configuration.ini</code> at Step 14) and stopping several Firefox-related processes Update-MozillaFirefox installs the downloaded Firefox on top of the existing Firefox installation, which triggers the in-built update procedure.</td>
-   </tr>
-   <tr>
-      <td style="padding:6px"><strong>Homepage:</strong></td>
-      <td style="padding:6px"><a href="https://github.com/auberginehill/update-mozilla-firefox">https://github.com/auberginehill/update-mozilla-firefox</a>
-      <br />Short URL: <a href="http://tinyurl.com/gr75tjx">http://tinyurl.com/gr75tjx</a></td>
-   </tr>
-   <tr>
-      <td style="padding:6px"><strong>Version:</strong></td>
-      <td style="padding:6px">1.2</td>
-   </tr>
-   <tr>
-        <td style="padding:6px"><strong>Sources:</strong></td>
-        <td style="padding:6px">
-            <table>
-                <tr>
-                    <td style="padding:6px">Emojis:</td>
-                    <td style="padding:6px"><a href="https://github.com/auberginehill/emoji-table">Emoji Table</a></td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">Tobias Weltner:</td>
-                    <td style="padding:6px"><a href="http://powershell.com/cs/PowerTips_Monthly_Volume_8.pdf#IDERA-1702_PS-PowerShellMonthlyTipsVol8-jan2014">PowerTips Monthly vol 8 January 2014</a> (or one of the <a href="https://web.archive.org/web/20150110213108/http://powershell.com/cs/media/p/30542.aspx">archive.org versions</a>)</td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">ps1:</td>
-                    <td style="padding:6px"><a href="http://powershell.com/cs/blogs/tips/archive/2011/05/04/test-internet-connection.aspx">Test Internet connection</a> (or one of the <a href="https://web.archive.org/web/20110612212629/http://powershell.com/cs/blogs/tips/archive/2011/05/04/test-internet-connection.aspx">archive.org versions</a>)</td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">Goyuix:</td>
-                    <td style="padding:6px"><a href="http://stackoverflow.com/questions/17601528/read-json-object-in-powershell-2-0#17602226 ">Read Json Object in Powershell 2.0</a></td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">lamaar75:</td>
-                    <td style="padding:6px"><a href="http://powershell.com/cs/forums/t/9685.aspx">Creating a Menu</a> (or one of the <a href="https://web.archive.org/web/20150910111758/http://powershell.com/cs/forums/t/9685.aspx">archive.org versions</a>)</td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">alejandro5042:</td>
-                    <td style="padding:6px"><a href="http://stackoverflow.com/questions/29266622/how-to-run-exe-with-without-elevated-privileges-from-powershell?rq=1">How to run exe with/without elevated privileges from PowerShell</a></td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">JaredPar and Matthew Pirocchi:</td>
-                    <td style="padding:6px"><a href="http://stackoverflow.com/questions/5466329/whats-the-best-way-to-determine-the-location-of-the-current-powershell-script?noredirect=1&lq=1">What's the best way to determine the location of the current PowerShell script?</a></td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">Jeff:</td>
-                    <td style="padding:6px"><a href="http://stackoverflow.com/questions/10941756/powershell-show-elapsed-time">Powershell show elapsed time</a></td>
-                </tr>
-                <tr>
-                    <td style="padding:6px">Microsoft TechNet:</td>
-                    <td style="padding:6px"><a href="https://technet.microsoft.com/en-us/library/ff730939.aspx">Adding a Simple Menu to a Windows PowerShell Script</a></td>
-                </tr>
-            </table>
+    <tr>
+        <td style="padding:6px"><strong>OS:</strong></td>
+        <td colspan="2" style="padding:6px">Windows</td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><strong>Type:</strong></td>
+        <td colspan="2" style="padding:6px">A Windows PowerShell script</td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><strong>Language:</strong></td>
+        <td colspan="2" style="padding:6px">Windows PowerShell</td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><strong>Description:</strong></td>
+        <td colspan="2" style="padding:6px">
+            <p>
+                Update-MozillaFirefox downloads a list of the most recent Firefox version numbers against which it compares the Firefox version numbers found on the system and displays, whether a Firefox update is needed or not. The actual update process naturally requires elevated rights and a working Internet connection. Update-MozillaFirefox detects the installed Firefoxes by querying the Windows registry for installed programs. The keys from <code>HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\</code> and <code>HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\</code> are read on 64-bit computers, and on the 32-bit computers only the latter path is accessed. At Step 7 Update-MozillaFirefox downloads and writes several Firefox-related files, namely "<code>firefox_current_versions.json</code>", "<code>firefox_release_history.json</code>", "<code>firefox_major_versions.json</code>", "<code>firefox_languages.json</code>" and "<code>firefox_regions.json</code>", which Update-MozillaFirefox uses as outside autonomous data sources. When run in a 'normal' PowerShell window, and all the detected Firefox versions are up-to-date, Update-MozillaFirefox will just check that everything is OK and leave without further ceremony at Step 11 (before trying to determine, whether it is run elevated or not).</p>
+            <p>
+                If Update-MozillaFirefox is run without elevated rights (but with a working Internet connection) in a machine with an old Firefox version, it will be shown that a Firefox update is needed, but Update-MozillaFirefox will exit at Step 12 before downloading any files. To perform an update with Update-MozillaFirefox, PowerShell has to be run in an elevated window (run as an administrator). If Update-MozillaFirefox is run in an elevated PowerShell window and no Firefox is detected, the script offers the option to install Firefox in the "<strong>Admin Corner</strong>" (step 11), where, in contrary to the main autonomous nature of Update-MozillaFirefox, an end-user input is required for selecting the bit-version and the language. In the "Admin Corner", one instance of either 32-bit or 64-bit version in the selected language is installable with Update-MozillaFirefox – the language selection covers over 30 languages.</p>
+            <p>
+                In the update procedure itself Update-MozillaFirefox downloads a full Firefox installer from Mozilla, which is equal to the type that is already installed on the system (same bit version and language). After writing the Install Configuration File (<code>firefox_configuration.ini</code> to <code>$path</code> at Step 14, where, for instance, the automatic Mozilla Maintenance service is disabled and the default shortcuts are enabled) and stopping several Firefox-related processes, Update-MozillaFirefox installs the downloaded Firefox on top of the existing Firefox installation, which triggers the in-built update procedure.</p>
         </td>
-   </tr>
-   <tr>
-      <td style="padding:6px"><strong>Downloads:</strong></td>
-      <td style="padding:6px">For instance <a href="https://raw.githubusercontent.com/auberginehill/update-mozilla-firefox/master/Update-MozillaFirefox.ps1">Update-MozillaFirefox.ps1</a>. Or <a href="https://github.com/auberginehill/update-mozilla-firefox/archive/master.zip">everything as a .zip-file</a>.</td>
-   </tr>
+    </tr>
+    <tr>
+        <td style="padding:6px"><strong>Homepage:</strong></td>
+        <td colspan="2" style="padding:6px"><a href="https://github.com/auberginehill/update-mozilla-firefox">https://github.com/auberginehill/update-mozilla-firefox</a>
+            <br />Short URL: <a href="http://tinyurl.com/gr75tjx">http://tinyurl.com/gr75tjx</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><strong>Version:</strong></td>
+        <td colspan="2" style="padding:6px">1.3</td>
+    </tr>
+    <tr>
+        <td rowspan="9" style="padding:6px"><strong>Sources:</strong></td>
+        <td style="padding:6px">Emojis:</td>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/emoji-table">Emoji Table</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px">Tobias Weltner:</td>
+        <td style="padding:6px"><a href="http://powershell.com/cs/PowerTips_Monthly_Volume_8.pdf#IDERA-1702_PS-PowerShellMonthlyTipsVol8-jan2014">PowerTips Monthly vol 8 January 2014</a>                (or one of the <a href="https://web.archive.org/web/20150110213108/http://powershell.com/cs/media/p/30542.aspx">archive.org versions</a>)</td>
+    </tr>
+    <tr>
+        <td style="padding:6px">ps1:</td>
+        <td style="padding:6px"><a href="http://powershell.com/cs/blogs/tips/archive/2011/05/04/test-internet-connection.aspx">Test Internet connection</a>                (or one of the <a href="https://web.archive.org/web/20110612212629/http://powershell.com/cs/blogs/tips/archive/2011/05/04/test-internet-connection.aspx">archive.org versions</a>)</td>
+    </tr>
+    <tr>
+        <td style="padding:6px">Goyuix:</td>
+        <td style="padding:6px"><a href="http://stackoverflow.com/questions/17601528/read-json-object-in-powershell-2-0#17602226 ">Read Json Object in Powershell 2.0</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px">lamaar75:</td>
+        <td style="padding:6px"><a href="http://powershell.com/cs/forums/t/9685.aspx">Creating a Menu</a> (or one of the <a href="https://web.archive.org/web/20150910111758/http://powershell.com/cs/forums/t/9685.aspx">archive.org versions</a>)</td>
+    </tr>
+    <tr>
+        <td style="padding:6px">alejandro5042:</td>
+        <td style="padding:6px"><a href="http://stackoverflow.com/questions/29266622/how-to-run-exe-with-without-elevated-privileges-from-powershell?rq=1">How to run exe with/without elevated privileges from PowerShell</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px">JaredPar and Matthew Pirocchi:</td>
+        <td style="padding:6px"><a href="http://stackoverflow.com/questions/5466329/whats-the-best-way-to-determine-the-location-of-the-current-powershell-script?noredirect=1&lq=1">What's the best way to determine the location of the current PowerShell script?</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px">Jeff:</td>
+        <td style="padding:6px"><a href="http://stackoverflow.com/questions/10941756/powershell-show-elapsed-time">Powershell show elapsed time</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px">Microsoft TechNet:</td>
+        <td style="padding:6px"><a href="https://technet.microsoft.com/en-us/library/ff730939.aspx">Adding a Simple Menu to a Windows PowerShell Script</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><strong>Downloads:</strong></td>
+        <td colspan="2" style="padding:6px">For instance <a href="https://raw.githubusercontent.com/auberginehill/update-mozilla-firefox/master/Update-MozillaFirefox.ps1">Update-MozillaFirefox.ps1</a>.
+            Or <a href="https://github.com/auberginehill/update-mozilla-firefox/archive/master.zip">everything as a .zip-file</a>.</td>
+    </tr>
 </table>
 
 
@@ -119,7 +113,7 @@
         <th>:arrow_right:</th>
         <td style="padding:6px">
             <ul>
-                <li>Displays Firefox related information in console. Tries to update an outdated Firefox to its latest version, if an old Firefox installation is found and if Update-MozillaFirefox is run in an elevated Powershell window. In addition to that, if such an update procedure is initiated...</li>
+                <li>Displays Firefox related information in console. Tries to update an outdated Firefox to its latest version, if an old Firefox installation is found, and if Update-MozillaFirefox is run in an elevated Powershell window. In addition to that...</li>
             </ul>
         </td>
     </tr>
@@ -128,7 +122,42 @@
         <td style="padding:6px">
             <ul>
                 <p>
-                    <li>The Firefox Install Configuration File (<code>firefox_configuration.ini</code>) is created with one active parameter (other parameters inside the file are commented out):</li>
+                    <li>At Step 7 the baseline Firefox version numbers are written to a file (<code>firefox_current_versions.json</code>) and also four additional auxillary JSON files are created, namely:</li>
+                </p>
+                <ol>
+                    <p><strong>Firefox JSON Files</strong> (at Step 7):</p>
+                    <p>
+                        <table>
+                            <tr>
+                                <td style="padding:6px"><strong>File</strong></td>
+                                <td style="padding:6px"><strong>Path</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px"><code>firefox_current_versions.json</code></td>
+                                <td style="padding:6px"><code>%TEMP%\firefox_current_versions.json</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px"><code>firefox_release_history.json</code></td>
+                                <td style="padding:6px"><code>%TEMP%\firefox_release_history.json</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px"><code>firefox_major_versions.json</code></td>
+                                <td style="padding:6px"><code>%TEMP%\firefox_major_versions.json</code></td>
+                            </tr>                       
+                            <tr>
+                                <td style="padding:6px"><code>firefox_languages.json</code></td>
+                                <td style="padding:6px"><code>%TEMP%\firefox_languages.json</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px"><code>firefox_regions.json</code></td>
+                                <td style="padding:6px"><code>%TEMP%\firefox_regions.json</code></td>
+                            </tr>
+                        </table>
+                    </p>
+                    <p>The <code>%TEMP%</code> location represents the current Windows temporary file folder. In PowerShell, for instance the command <code>$env:temp</code> displays the temp-folder path.</p>
+                </ol>
+                <p>
+                    <li>If the actual update procedure including the installation file downloading is initiated, a Firefox Install Configuration File (<code>firefox_configuration.ini</code>) is created with one active parameter (other parameters inside the file are commented out), and after Firefox has been updated, a web page displaying the latest version is opened in the default browser.</li>
                 </p>
                 <ol>
                     <p><strong>Install Configuration File</strong> (at Step 14):</p>
@@ -163,37 +192,6 @@
                         </table>
                     </p>
                     <p>For a comprehensive list of available settings and a more detailed description of the value above, please see the "<a href="https://wiki.mozilla.org/Installer:Command_Line_Arguments">Installer:Command Line Arguments</a>" page.</p>
-                </ol>
-                <p>
-                    <li>At Step 7 the baseline Firefox version numbers are written to a file (<code>firefox_current_versions.json</code>) and also three additional auxillary JSON files are created, namely:</li>
-                </p>
-                <ol>
-                    <p><strong>Firefox JSON Files</strong> (at Step 7):</p>
-                    <p>
-                        <table>
-                            <tr>
-                                <td style="padding:6px"><strong>File</strong></td>
-                                <td style="padding:6px"><strong>Path</strong></td>
-                            </tr>
-                            <tr>
-                                <td style="padding:6px"><code>firefox_current_versions.json</code></td>
-                                <td style="padding:6px"><code>%TEMP%\firefox_current_versions.json</code></td>
-                            </tr>
-                            <tr>
-                                <td style="padding:6px"><code>firefox_release_history.json</code></td>
-                                <td style="padding:6px"><code>%TEMP%\firefox_release_history.json</code></td>
-                            </tr>
-                            <tr>
-                                <td style="padding:6px"><code>firefox_languages.json</code></td>
-                                <td style="padding:6px"><code>%TEMP%\firefox_languages.json</code></td>
-                            </tr>
-                            <tr>
-                                <td style="padding:6px"><code>firefox_regions.json</code></td>
-                                <td style="padding:6px"><code>%TEMP%\firefox_regions.json</code></td>
-                            </tr>
-                        </table>
-                    </p>
-                    <p>The <code>%TEMP%</code> location represents the current Windows temporary file folder. In PowerShell, for instance the command <code>$env:temp</code> displays the temp-folder path.</p>
                 </ol>
                 <p>
                     <li>To open these file locations in a Resource Manager Window, for instance a command
@@ -248,11 +246,11 @@
                     <br />
                     <br />may be used at the PowerShell prompt window <code>[PS&gt;]</code>. To change the temp folder for instance to <code>C:\Temp</code>, please, for example, follow the instructions at <a href="http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-location-windows.html">Temporary Files Folder - Change Location in Windows</a>, which in essence are something along the lines:
                         <ol>
-                           <li>Right click on Computer and click on Properties (or select Start → Control Panel → System). In the resulting window with the basic information about the computer...</li>
-                           <li>Click on Advanced system settings on the left panel and select Advanced tab on the resulting pop-up window.</li>
+                           <li>Right click Computer icon and select Properties (or select Start → Control Panel → System. On Windows 10 this instance may also be found by right clicking Start and selecting Control Panel → System... or by pressing <code>[Win-key]</code> + X and selecting Control Panel → System). On the window with basic information about the computer...</li>
+                           <li>Click on Advanced system settings on the left panel and select Advanced tab on the "System Properties" pop-up window.</li>
                            <li>Click on the button near the bottom labeled Environment Variables.</li>
-                           <li>In the topmost section labeled User variables both TMP and TEMP may be seen. Each different login account is assigned its own temporary locations. These values can be changed by double clicking a value or by highlighting a value and selecting Edit. The specified path will be used by Windows and many other programs for temporary files. It's advisable to set the same value (a directory path) for both TMP and TEMP.</li>
-                           <li>Any running programs need to be restarted for the new values to take effect. In fact, probably also Windows itself needs to be restarted for it to begin using the new values for its own temporary files.</li>
+                           <li>In the topmost section, which lists the User variables, both TMP and TEMP may be seen. Each different login account is assigned its own temporary locations. These values can be changed by double clicking a value or by highlighting a value and selecting Edit. The specified path will be used by Windows and many other programs for temporary files. It's advisable to set the same value (a directory path) for both TMP and TEMP.</li>
+                           <li>Any running programs need to be restarted for the new values to take effect. In fact, probably Windows itself needs to be restarted for it to begin using the new values for its own temporary files.</li>
                         </ol>
                     </li>
                 </p>
@@ -277,46 +275,92 @@
             <ol>
                 <p>
                     <li><code>./Update-MozillaFirefox</code><br />
-                    Run the script. Please notice to insert <code>./</code> or <code>.\</code> before the script name.</li>
+                    Runs the script. Please notice to insert <code>./</code> or <code>.\</code> before the script name.</li>
                 </p>
                 <p>
                     <li><code>help ./Update-MozillaFirefox -Full</code><br />
-                    Display the help file.</li>
+                    Displays the help file.</li>
                 </p>
                 <p>
-                    <li><p><code>Set-ExecutionPolicy remotesigned</code><br />
-                    This command is altering the Windows PowerShell rights to enable script execution for the default (LocalMachine) scope. Windows PowerShell has to be run with elevated rights (run as an administrator) to actually be able to change the script execution properties. The default value of the default (LocalMachine) scope is "<code>Set-ExecutionPolicy restricted</code>".</p>
+                    <li><p><code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine</code><br />
+                    This command is altering the Windows PowerShell rights to enable script execution in the default (<code>LocalMachine</code>) scope, and defines the conditions under which Windows PowerShell loads configuration files and runs scripts in general. In Windows Vista and later versions of Windows, for running commands that change the execution policy of the <code>LocalMachine</code> scope, Windows PowerShell has to be run with elevated rights (<dfn>Run as Administrator</dfn>). The default policy of the default (<code>LocalMachine</code>) scope is "<code>Restricted</code>", and a command "<code>Set-ExecutionPolicy Restricted</code>" will "<dfn>undo</dfn>" the changes made with the original example above (had the policy not been changed before...). Execution policies for the local computer (<code>LocalMachine</code>) and for the current user (<code>CurrentUser</code>) are stored in the registry (at for instance the <code>HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ExecutionPolicy</code> key), and remain effective until they are changed again. The execution policy for a particular session (<code>Process</code>) is stored only in memory, and is discarded when the session is closed.</p>
                         <p>Parameters:
-                                <ol>
-                                    <table>
-                                        <tr>
-                                            <td style="padding:6px"><code>Restricted</code></td>
-                                            <td style="padding:6px">Does not load configuration files or run scripts. Restricted is the default execution policy.</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding:6px"><code>AllSigned</code></td>
-                                            <td style="padding:6px">Requires that all scripts and configuration files be signed by a trusted publisher, including scripts that you write on the local computer.</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding:6px"><code>RemoteSigned</code></td>
-                                            <td style="padding:6px">Requires that all scripts and configuration files downloaded from the Internet be signed by a trusted publisher.</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding:6px"><code>Unrestricted</code></td>
-                                            <td style="padding:6px">Loads all configuration files and runs all scripts. If you run an unsigned script that was downloaded from the Internet, you are prompted for permission before it runs.</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding:6px"><code>Bypass</code></td>
-                                            <td style="padding:6px">Nothing is blocked and there are no warnings or prompts.</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding:6px"><code>Undefined</code></td>
-                                            <td style="padding:6px">Removes the currently assigned execution policy from the current scope. This parameter will not remove an execution policy that is set in a Group Policy scope.</td>
-                                        </tr>
-                                    </table>
-                                </ol>
+                            <ul>
+                                <table>
+                                    <tr>
+                                        <td style="padding:6px"><code>Restricted</code></td>
+                                        <td colspan="2" style="padding:6px">Does not load configuration files or run scripts, but permits individual commands. <code>Restricted</code> is the default execution policy.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px"><code>AllSigned</code></td>
+                                        <td colspan="2" style="padding:6px">Scripts can run. Requires that all scripts and configuration files be signed by a trusted publisher, including the scripts that have been written on the local computer. Risks running signed, but malicious, scripts.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px"><code>RemoteSigned</code></td>
+                                        <td colspan="2" style="padding:6px">Requires a digital signature from a trusted publisher on scripts and configuration files that are downloaded from the Internet (including e-mail and instant messaging programs). Does not require digital signatures on scripts that have been written on the local computer. Permits running unsigned scripts that are downloaded from the Internet, if the scripts are unblocked by using the <code>Unblock-File</code> cmdlet. Risks running unsigned scripts from sources other than the Internet and signed, but malicious, scripts.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px"><code>Unrestricted</code></td>
+                                        <td colspan="2" style="padding:6px">Loads all configuration files and runs all scripts. Warns the user before running scripts and configuration files that are downloaded from the Internet. Not only risks, but actually permits, eventually, running any unsigned scripts from any source. Risks running malicious scripts.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px"><code>Bypass</code></td>
+                                        <td colspan="2" style="padding:6px">Nothing is blocked and there are no warnings or prompts. Not only risks, but actually permits running any unsigned scripts from any source. Risks running malicious scripts.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px"><code>Undefined</code></td>
+                                        <td colspan="2" style="padding:6px">Removes the currently assigned execution policy from the current scope. If the execution policy in all scopes is set to <code>Undefined</code>, the effective execution policy is <code>Restricted</code>, which is the default execution policy. This parameter will not alter or remove the ("<dfn>master</dfn>") execution policy that is set with a Group Policy setting.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px; border-top-width:1px; border-top-style:solid;"><span style="font-size: 95%">Notes:</span></td>
+                                        <td colspan="2" style="padding:6px">
+                                            <ul>
+                                                <li><span style="font-size: 95%">Please note that the Group Policy setting "<code>Turn on Script Execution</code>" overrides the execution policies set in Windows PowerShell in all scopes. To find this ("<dfn>master</dfn>") setting, please, for example, open the Local Group Policy Editor (<code>gpedit.msc</code>) and navigate to Computer Configuration → Administrative Templates → Windows Components → Windows PowerShell.</span></li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <td colspan="2" style="padding:6px">
+                                            <ul>
+                                                <li><span style="font-size: 95%">The Local Group Policy Editor (<code>gpedit.msc</code>) is not available in any Home or Starter edition of Windows.</span></li>
+                                                <ol>
+                                                    <p>
+                                                        <table>
+                                                            <tr>
+                                                                <td style="padding:6px; font-size: 85%"><strong>Group Policy Setting</strong> "<code>Turn&nbsp;on&nbsp;Script&nbsp;Execution</code>"</td>
+                                                                <td style="padding:6px; font-size: 85%"><strong>PowerShell Equivalent</strong> (concerning all scopes)</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding:6px; font-size: 85%"><code>Not configured</code></td>
+                                                                <td style="padding:6px; font-size: 85%">No effect, the default value of this setting</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding:6px; font-size: 85%"><code>Disabled</code></td>
+                                                                <td style="padding:6px; font-size: 85%"><code>Restricted</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding:6px; font-size: 85%"><code>Enabled</code> – Allow only signed scripts</td>
+                                                                <td style="padding:6px; font-size: 85%"><code>AllSigned</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding:6px; font-size: 85%"><code>Enabled</code> – Allow local scripts and remote signed scripts</td>
+                                                                <td style="padding:6px; font-size: 85%"><code>RemoteSigned</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding:6px; font-size: 85%"><code>Enabled</code> – Allow all scripts</td>
+                                                                <td style="padding:6px; font-size: 85%"><code>Unrestricted</code></td>
+                                                            </tr>
+                                                        </table>
+                                                    </p>
+                                                </ol>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </ul>
                         </p>
-                     <p>For more information, please type "<code>Get-ExecutionPolicy -List</code>", "<code>help Set-ExecutionPolicy -Full</code>", "<code>help about_Execution_Policies</code>" or visit <a href="https://technet.microsoft.com/en-us/library/hh849812.aspx">Set-ExecutionPolicy</a> or <a href="http://go.microsoft.com/fwlink/?LinkID=135170">about_Execution_Policies</a>.</p>
+                    <p>For more information, please type "<code>Get-ExecutionPolicy -List</code>", "<code>help Set-ExecutionPolicy -Full</code>", "<code>help about_Execution_Policies</code>" or visit <a href="https://technet.microsoft.com/en-us/library/hh849812.aspx">Set-ExecutionPolicy</a> or <a href="http://go.microsoft.com/fwlink/?LinkID=135170">about_Execution_Policies</a>.</p>
                     </li>
                 </p>
                 <p>
@@ -337,24 +381,22 @@
 
 ### Contributing
 
-<p>Find a bug? Have a feature request? Here is how you can contribute to this project:</p>
-
- <table>
-   <tr>
-      <th><img class="emoji" title="contributing" alt="contributing" height="28" width="28" align="absmiddle" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f33f.png"></th>
-      <td style="padding:6px"><strong>Bugs:</strong></td>
-      <td style="padding:6px"><a href="https://github.com/auberginehill/update-mozilla-firefox/issues">Submit bugs</a> and help us verify fixes.</td>
-   </tr>
-   <tr>
-      <th rowspan="2"></th>
-      <td style="padding:6px"><strong>Feature Requests:</strong></td>
-      <td style="padding:6px">Feature request can be submitted by <a href="https://github.com/auberginehill/update-mozilla-firefox/issues">creating an Issue</a>.</td>
-   </tr>
-   <tr>
-      <td style="padding:6px"><strong>Edit Source Files:</strong></td>
-      <td style="padding:6px"><a href="https://github.com/auberginehill/update-mozilla-firefox/pulls">Submit pull requests</a> for bug fixes and features and discuss existing proposals.</td>
-   </tr>
- </table>
+<table>
+    <tr>
+        <th><img class="emoji" title="contributing" alt="contributing" height="28" width="28" align="absmiddle" src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f33f.png"></th>
+        <td style="padding:6px"><strong>Bugs:</strong></td>
+        <td style="padding:6px">Bugs can be reported by creating a new <a href="https://github.com/auberginehill/update-mozilla-firefox/issues">issue</a>.</td>
+    </tr>
+    <tr>
+        <th rowspan="2"></th>
+        <td style="padding:6px"><strong>Feature Requests:</strong></td>
+        <td style="padding:6px">Feature request can be submitted by creating a new <a href="https://github.com/auberginehill/update-mozilla-firefox/issues">issue</a>.</td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><strong>Editing Source Files:</strong></td>
+        <td style="padding:6px">New features, fixes and other potential changes can be discussed in further detail by opening a <a href="https://github.com/auberginehill/update-mozilla-firefox/pulls">pull request</a>.</td>
+    </tr>
+</table>
 
 
 
@@ -367,7 +409,7 @@
         <td style="padding:6px"><a href="https://github.com/auberginehill/update-mozilla-firefox">Script Homepage</a></td>
     </tr>
     <tr>
-        <th rowspan="21"></th>
+        <th rowspan="22"></th>
         <td style="padding:6px">Tobias Weltner: <a href="http://powershell.com/cs/PowerTips_Monthly_Volume_8.pdf#IDERA-1702_PS-PowerShellMonthlyTipsVol8-jan2014">PowerTips Monthly vol 8 January 2014</a> (or one of the <a href="https://web.archive.org/web/20150110213108/http://powershell.com/cs/media/p/30542.aspx">archive.org versions</a>)</td>
     </tr>
     <tr>
@@ -399,6 +441,9 @@
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-json">ConvertFrom-Json</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-stringdata">ConvertFrom-StringData</a></td>
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://blogs.technet.microsoft.com/heyscriptingguy/2014/04/23/powertip-convert-json-file-to-powershell-object/">PowerTip: Convert JSON File to PowerShell Object</a></td>
@@ -443,8 +488,11 @@
         <td style="padding:6px"><a href="https://gist.github.com/auberginehill/aa812bfa79fa19fbd880b97bdc22e2c1">Disable-Defrag</a></td>
     </tr>
     <tr>
-        <th rowspan="25"></th>
-        <td style="padding:6px"><a href="https://github.com/auberginehill/firefox-customization-files">Firefox Customization Files</a></td>
+        <th rowspan="26"></th>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/emoji-table">Emoji Table</a></td>
+    </tr>
+    <tr>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/firefox-customization-files">Firefox Customization Files</a></td>        
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-ascii-table">Get-AsciiTable</a></td>
@@ -489,7 +537,7 @@
         <td style="padding:6px"><a href="https://github.com/auberginehill/get-unused-drive-letters">Get-UnusedDriveLetters</a></td>
     </tr>
     <tr>
-        <td style="padding:6px"><a href="https://github.com/auberginehill/emoji-table">Emoji Table</a></td>
+        <td style="padding:6px"><a href="https://github.com/auberginehill/get-windows-10-lock-screen-wallpapers">Get-Windows10LockScreenWallpapers</a></td>
     </tr>
     <tr>
         <td style="padding:6px"><a href="https://github.com/auberginehill/java-update">Java-Update</a></td>
