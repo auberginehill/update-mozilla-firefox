@@ -1897,21 +1897,19 @@ is found, tries to update Firefox.
 .DESCRIPTION
 Update-MozillaFirefox downloads a list of the most recent Firefox version numbers
 against which it compares the Firefox version numbers found on the system and
-displays, whether a Firefox update is needed or not. The actual update process
-naturally requires elevated rights and a working Internet connection.
-Update-MozillaFirefox detects the installed Firefoxes by querying the Windows
-registry for installed programs. The keys from
+displays, whether a Firefox update is needed or not. Update-MozillaFirefox detects
+the installed Firefoxes by querying the Windows registry for installed programs.
+The keys from
 HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ and
 HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ are read on 64-bit
 computers, and on the 32-bit computers only the latter path is accessed. At Step 7
 Update-MozillaFirefox downloads and writes several Firefox-related files, namely
 "firefox_current_versions.json", "firefox_release_history.json",
 "firefox_major_versions.json", "firefox_languages.json" and "firefox_regions.json",
-which Update-MozillaFirefox uses as outside autonomous data sources. When run in
-a 'normal' PowerShell window, and all the detected Firefox versions are up-to-date,
+which Update-MozillaFirefox uses as data sources. When run in a 'normal' PowerShell
+window, and all the detected Firefox versions seem to be up-to-date,
 Update-MozillaFirefox will just check that everything is OK and leave without
-further ceremony at Step 11 (before trying to determine, whether it is run elevated
-or not).
+further ceremony at Step 11.
 
 If Update-MozillaFirefox is run without elevated rights (but with a working Internet
 connection) in a machine with an old Firefox version, it will be shown that
@@ -1922,9 +1920,9 @@ Update-MozillaFirefox is run in an elevated PowerShell window and no Firefox is
 detected, the script offers the option to install Firefox in the "Admin Corner"
 (step 11), where, in contrary to the main autonomous nature of Update-MozillaFirefox,
 an end-user input is required for selecting the bit-version and the language. In
-the "Admin Corner", one instance of either 32-bit or 64-bit version in the selected
-language is installable with Update-MozillaFirefox – the language selection covers
-over 30 languages.
+the "Admin Corner", one instance of either 32-bit or 64-bit version in one of the
+available languages is installable with Update-MozillaFirefox – the language
+selection covers over 30 languages.
 
 In the update procedure itself Update-MozillaFirefox downloads a full Firefox
 installer from Mozilla, which is equal to the type that is already installed on
@@ -1933,7 +1931,7 @@ File (firefox_configuration.ini to $path at Step 14, where, for instance,
 the automatic Mozilla Maintenance service is disabled and the default shortcuts
 are enabled) and stopping several Firefox-related processes, Update-MozillaFirefox
 installs the downloaded Firefox on top of the existing Firefox installation,
-which triggers the in-built update procedure.
+which triggers the in-built Firefox update procedure.
 
 .OUTPUTS
 Displays Firefox related information in console. Tries to update an outdated Firefox
