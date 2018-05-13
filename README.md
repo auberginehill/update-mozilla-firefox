@@ -48,7 +48,7 @@
     </tr>
     <tr>
         <td style="padding:6px"><strong>Version:</strong></td>
-        <td colspan="2" style="padding:6px">1.3</td>
+        <td colspan="2" style="padding:6px">1.4</td>
     </tr>
     <tr>
         <td rowspan="9" style="padding:6px"><strong>Sources:</strong></td>
