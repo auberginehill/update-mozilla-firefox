@@ -1429,9 +1429,9 @@ If (($multiple_firefoxes -ne $true) -and ($admin_corner -ne $true)) {
             # $system_language_and_region = (Get-Culture).Name
             # $system_language_abbreviation = (Get-Culture).TwoLetterISOLanguageName
             # $system_language = (Get-Culture).EnglishName
-            If ($firefox_enumeration.Locale -ne $null) {
-                $lang = [string]'&lang=' + $firefox_enumeration.Locale
-            } ElseIf ($firefox_enumeration.Locale -eq $null) {
+            If (($firefox_enumeration | select -ExpandProperty Locale) -ne $null) {
+                $lang = [string]'&lang=' + ($firefox_enumeration | select -ExpandProperty Locale)
+            } ElseIf (($firefox_enumeration | select -ExpandProperty Locale) -eq $null) {
 
                     If ((($language | Select-Object -ErrorAction SilentlyContinue -ExpandProperty "$($(Get-Culture).TwoLetterISOLanguageName)").English) -match ((Get-Culture).EnglishName.split(' (')[0]) ) {
                         $lang = [string]'&lang=' + $($(Get-Culture).TwoLetterISOLanguageName)
@@ -2048,7 +2048,7 @@ http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-locatio
 
     Homepage:           https://github.com/auberginehill/update-mozilla-firefox
     Short URL:          http://tinyurl.com/gr75tjx
-    Version:            1.3
+    Version:            1.4
 
 .EXAMPLE
 ./Update-MozillaFirefox
