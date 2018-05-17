@@ -147,8 +147,8 @@ If ($registry_paths_selection -ne $null) {
         $product_version_enum = ((Get-ItemProperty -Path "$($item.InstallLocation)\Firefox.exe" -ErrorAction SilentlyContinue -Name VersionInfo).VersionInfo).ProductVersion
         $test_stability = $product_version_enum -match "(\d+)\.(\d+)\.(\d+)"
         $test_major = $product_version_enum -match "(\d+)\.(\d+)"
-        If (($product_version_enum -ne $null) -and ($test_stability -eq $true)) { $product_version_enum -match "(?<C1>\d+)\.(?<C2>\d+)\.(?<C3>\d+)" } Else { $continue = $true }
-        If (($product_version_enum -ne $null) -and ($test_stability -eq $false) -and ($test_major -eq $true)) { $product_version_enum -match "(?<C1>\d+)\.(?<C2>\d+)" } Else { $continue = $true }
+        If (($product_version_enum -ne $null) -and ($test_stability -eq $true)) { $product_version_enum -match "(?<C1>\d+)\.(?<C2>\d+)\.(?<C3>\d+)" | Out-Null } Else { $continue = $true }
+        If (($product_version_enum -ne $null) -and ($test_stability -eq $false) -and ($test_major -eq $true)) { $product_version_enum -match "(?<C1>\d+)\.(?<C2>\d+)" | Out-Null } Else { $continue = $true }
 
 
                             $firefox_enumeration += $obj_firefox = New-Object -TypeName PSCustomObject -Property @{
@@ -2048,7 +2048,7 @@ http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-locatio
 
     Homepage:           https://github.com/auberginehill/update-mozilla-firefox
     Short URL:          http://tinyurl.com/gr75tjx
-    Version:            1.4
+    Version:            1.5
 
 .EXAMPLE
 ./Update-MozillaFirefox
