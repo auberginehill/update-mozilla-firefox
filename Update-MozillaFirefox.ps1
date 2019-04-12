@@ -384,10 +384,10 @@ Start-Sleep -Seconds 2
 # Join the two files containing release dates
 # Source: https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/convertfrom-stringdata
 # Source: https://technet.microsoft.com/en-us/library/ee692803.aspx
-$history_file_content = (Get-Content -Path $history_file)
-$history_conversion = $history_file_content.Replace("}",", ")
-$major_file_content = (Get-Content -Path $major_file)
-$major_conversion = $major_file_content.Replace("{","")
+# $history_file_content = (Get-Content -Path $history_file)
+# $major_file_content = (Get-Content -Path $major_file)
+$history_conversion = [System.IO.File]::ReadAllText($history_file).Replace("}",", ")
+$major_conversion = [System.IO.File]::ReadAllText($major_file).Replace("{","")
 $all_firefox = [string]$history_conversion + $major_conversion
 
 If ((($PSVersionTable.PSVersion).Major -lt 3) -or (($PSVersionTable.PSVersion).Major -eq $null)) {
@@ -2048,7 +2048,7 @@ http://www.eightforums.com/tutorials/23500-temporary-files-folder-change-locatio
 
     Homepage:           https://github.com/auberginehill/update-mozilla-firefox
     Short URL:          http://tinyurl.com/gr75tjx
-    Version:            1.5
+    Version:            1.6
 
 .EXAMPLE
 ./Update-MozillaFirefox
